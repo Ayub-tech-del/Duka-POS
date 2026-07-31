@@ -121,9 +121,12 @@ async function loadProducts() {
   productsBody.innerHTML = productCache.length
     ? productCache.map(p => {
         const margin = p.price > 0 ? (((p.price - p.cost) / p.price) * 100).toFixed(1) : '0.0';
+        const thumb = p.image
+          ? `<img src="${esc(p.image)}" class="product-thumb" alt="">`
+          : `<span class="product-thumb product-thumb-emoji">${p.emoji}</span>`;
         return `
           <tr data-id="${p.id}">
-            <td>${p.emoji} ${esc(p.name)}</td>
+            <td class="product-cell">${thumb} ${esc(p.name)}</td>
             <td>${esc(p.cat)}</td>
             <td>${money(p.price)}</td>
             <td>${money(p.cost)}</td>
@@ -156,11 +159,27 @@ async function loadProducts() {
 
 function openProductModal(product) {
   const isEdit = !!product;
+  let removeImage = false;
+
   openModal(isEdit ? 'Edit product' : 'Add product', `
     <div class="modal-error" id="mError"></div>
+    <div class="modal-field">
+      <label>Photo</label>
+      <div class="image-upload-row">
+        <div class="image-preview-box" id="mImagePreviewBox">
+          ${isEdit && product.image
+            ? `<img id="mImagePreview" src="${esc(product.image)}" alt="">`
+            : `<span id="mImagePreview" class="image-preview-placeholder">${isEdit ? product.emoji : '📦'}</span>`}
+        </div>
+        <div class="image-upload-actions">
+          <label class="ghost-btn file-btn">Choose photo<input id="mImage" type="file" accept="image/*" hidden></label>
+          ${isEdit && product.image ? `<button type="button" class="row-action" id="mRemoveImage">Remove photo</button>` : ''}
+        </div>
+      </div>
+    </div>
     <div class="modal-field"><label>Name</label><input id="mName" type="text" placeholder="e.g. Maize Flour 2kg" value="${isEdit ? esc(product.name) : ''}"></div>
     <div class="modal-field"><label>Category</label><input id="mCat" type="text" placeholder="e.g. Groceries" value="${isEdit ? esc(product.cat) : ''}"></div>
-    <div class="modal-field"><label>Emoji</label><input id="mEmoji" type="text" placeholder="📦" maxlength="4" value="${isEdit ? esc(product.emoji) : ''}"></div>
+    <div class="modal-field"><label>Emoji (used if no photo)</label><input id="mEmoji" type="text" placeholder="📦" maxlength="4" value="${isEdit ? esc(product.emoji) : ''}"></div>
     <div class="modal-field"><label>Sell price</label><input id="mPrice" type="number" min="0" step="1" value="${isEdit ? product.price : ''}"></div>
     <div class="modal-field"><label>Cost price</label><input id="mCost" type="number" min="0" step="1" value="${isEdit ? product.cost : 0}"></div>
   `, async () => {
@@ -172,22 +191,51 @@ function openProductModal(product) {
       errorEl.classList.add('show');
       return;
     }
-    const payload = {
-      name,
-      price,
-      cost: document.getElementById('mCost').value || 0,
-      emoji: document.getElementById('mEmoji').value.trim() || '📦',
-      cat: document.getElementById('mCat').value.trim() || 'General',
-    };
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('price', price);
+    formData.append('cost', document.getElementById('mCost').value || 0);
+    formData.append('emoji', document.getElementById('mEmoji').value.trim() || '📦');
+    formData.append('cat', document.getElementById('mCat').value.trim() || 'General');
+    const fileInput = document.getElementById('mImage');
+    if (fileInput.files[0]) formData.append('image', fileInput.files[0]);
+    if (removeImage) formData.append('removeImage', 'true');
+
     const url = isEdit ? `/api/products/${product.id}` : '/api/products';
-    await fetch(url, {
-      method: isEdit ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    const res = await fetch(url, { method: isEdit ? 'PUT' : 'POST', body: formData });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      errorEl.textContent = err.error || 'Could not save product';
+      errorEl.classList.add('show');
+      return;
+    }
     closeModal();
     loadProducts();
   });
+
+  const fileInput = document.getElementById('mImage');
+  const previewBox = document.getElementById('mImagePreviewBox');
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    removeImage = false;
+    const reader = new FileReader();
+    reader.onload = () => {
+      previewBox.innerHTML = `<img id="mImagePreview" src="${reader.result}" alt="">`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  const removeBtn = document.getElementById('mRemoveImage');
+  if (removeBtn) {
+    removeBtn.addEventListener('click', () => {
+      removeImage = true;
+      fileInput.value = '';
+      previewBox.innerHTML = `<span id="mImagePreview" class="image-preview-placeholder">${esc(product.emoji || '📦')}</span>`;
+      removeBtn.remove();
+    });
+  }
 }
 
 addProductBtn.addEventListener('click', () => openProductModal(null));

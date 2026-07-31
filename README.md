@@ -68,7 +68,9 @@ public/dashboard.js      → dashboard tabs, P&L/sales polling, product & staff 
 public/dashboard.css     → dashboard layout (sidebar, stat cards, tables, modal)
 public/app.js            → POS cart logic, STK push call, payment polling
 public/style.css         → shared design system (till-roll receipt, product grid)
+public/uploads/          → uploaded product photos (created on first upload, gitignored)
 .env.example             → credential template
 ```
 
-Note: `npm install` now also pulls in `express-session` and `bcryptjs` for authentication — run it again if you installed before this update.
+Note: `npm install` now also pulls in `express-session` and `bcryptjs` for authentication, and
+`multer` for product photo uploads — run it again if you installed before this update.

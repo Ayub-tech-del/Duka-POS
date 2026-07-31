@@ -177,6 +177,13 @@ html, body {
   line-height: 1;
 }
 
+.product-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
 .product-name {
   font-weight: 600;
   font-size: 14.5px;

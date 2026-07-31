@@ -44,10 +44,13 @@ function renderGrid() {
 
   productGrid.innerHTML = items.map(p => {
     const qty = cart[p.id] || 0;
+    const media = p.image
+      ? `<img class="product-photo" src="${p.image}" alt="">`
+      : `<div class="product-emoji">${p.emoji}</div>`;
     return `
       <div class="product-card" data-id="${p.id}">
         ${qty > 0 ? `<div class="qty-badge">${qty}</div>` : ''}
-        <div class="product-emoji">${p.emoji}</div>
+        ${media}
         <div class="product-name">${p.name}</div>
         <div class="product-price">${money(p.price)}</div>
       </div>`;

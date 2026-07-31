@@ -1,12 +1,38 @@
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
 const db = require('./db');
 
 const app = express();
+
+const UPLOADS_DIR = path.join(__dirname, 'public', 'uploads');
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: UPLOADS_DIR,
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      cb(null, `product-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) return cb(new Error('Only image files are allowed'));
+    cb(null, true);
+  },
+});
+
+function deleteUpload(imagePath) {
+  if (!imagePath || !imagePath.startsWith('/uploads/')) return;
+  fs.unlink(path.join(__dirname, 'public', imagePath), () => {});
+}
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(
@@ -239,29 +265,45 @@ app.get('/api/products', requireAuth, (req, res) => {
   res.json(data.products);
 });
 
-app.put('/api/products/:id', requireOwner, (req, res) => {
+function handleUpload(req, res, next) {
+  upload.single('image')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    next();
+  });
+}
+
+app.put('/api/products/:id', requireOwner, handleUpload, (req, res) => {
   const data = db.load();
   const id = Number(req.params.id);
   const product = data.products.find(p => p.id === id);
   if (!product) return res.status(404).json({ error: 'Product not found' });
 
-  const { price, cost, name, emoji, cat } = req.body;
+  const { price, cost, name, emoji, cat, removeImage } = req.body;
   if (price !== undefined) product.price = Number(price);
   if (cost !== undefined) product.cost = Number(cost);
   if (name !== undefined) product.name = name;
   if (emoji !== undefined) product.emoji = emoji;
   if (cat !== undefined) product.cat = cat;
 
+  if (req.file) {
+    deleteUpload(product.image);
+    product.image = `/uploads/${req.file.filename}`;
+  } else if (removeImage === 'true') {
+    deleteUpload(product.image);
+    delete product.image;
+  }
+
   db.save(data);
   res.json(product);
 });
 
-app.post('/api/products', requireOwner, (req, res) => {
+app.post('/api/products', requireOwner, handleUpload, (req, res) => {
   const data = db.load();
   const { name, price, cost = 0, emoji = '📦', cat = 'General' } = req.body;
   if (!name || price === undefined) return res.status(400).json({ error: 'name and price required' });
 
   const product = { id: data.nextProductId++, name, price: Number(price), cost: Number(cost), emoji, cat };
+  if (req.file) product.image = `/uploads/${req.file.filename}`;
   data.products.push(product);
   db.save(data);
   res.json(product);
@@ -269,6 +311,8 @@ app.post('/api/products', requireOwner, (req, res) => {
 
 app.delete('/api/products/:id', requireOwner, (req, res) => {
   const data = db.load();
+  const product = data.products.find(p => p.id === Number(req.params.id));
+  if (product) deleteUpload(product.image);
   data.products = data.products.filter(p => p.id !== Number(req.params.id));
   db.save(data);
   res.json({ ok: true });
