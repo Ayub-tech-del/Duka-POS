@@ -1,14 +1,14 @@
 :root {
-  --ink: #2a1b12;
-  --ink-soft: #6b4f3a;
-  --paper: #f9f0e1;
-  --paper-dim: #f0e0c4;
-  --green: #c1592f;
-  --green-deep: #8a3d1f;
-  --marigold: #d99a2b;
-  --rust: #7a2036;
-  --line: rgba(42, 27, 18, 0.14);
-  --shadow: 0 20px 40px rgba(42, 27, 18, 0.16);
+  --ink: #f2f1ef;
+  --ink-soft: rgba(242, 241, 239, 0.6);
+  --paper: #18181A;
+  --paper-dim: #29292B;
+  --green: #f2f1ef;
+  --green-deep: #0C0C0F;
+  --marigold: #4C4C4E;
+  --rust: rgba(242, 241, 239, 0.7);
+  --line: #38383A;
+  --shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 
   --font-display: "Fraunces", serif;
   --font-body: "Space Grotesk", sans-serif;
@@ -113,7 +113,7 @@ html, body {
   padding: 12px 16px;
   border: 1.5px solid var(--line);
   border-radius: 10px;
-  background: #fff;
+  background: var(--paper-dim);
   font-family: var(--font-body);
   font-size: 14px;
   color: var(--ink);
@@ -144,7 +144,7 @@ html, body {
 .cat-pill.active, .cat-pill:hover {
   background: var(--green);
   border-color: var(--green);
-  color: var(--paper);
+  color: var(--green-deep);
 }
 
 .grid {
@@ -154,7 +154,7 @@ html, body {
 }
 
 .product-card {
-  background: #fff;
+  background: var(--paper-dim);
   border: 1.5px solid var(--line);
   border-radius: 14px;
   padding: 16px 14px;
@@ -167,7 +167,7 @@ html, body {
 }
 .product-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 24px rgba(20,32,26,0.14);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
   border-color: var(--green);
 }
 .product-card:active { transform: translateY(0); }
@@ -201,8 +201,8 @@ html, body {
 .qty-badge {
   position: absolute;
   top: -8px; right: -8px;
-  background: var(--rust);
-  color: #fff;
+  background: var(--green-deep);
+  color: var(--ink);
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 600;
@@ -211,7 +211,7 @@ html, body {
   border-radius: 999px;
   display: flex; align-items: center; justify-content: center;
   padding: 0 5px;
-  box-shadow: 0 3px 8px rgba(181,72,42,0.4);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
 }
 
 /* ============ TILL (right) ============ */
@@ -299,7 +299,7 @@ html, body {
   width: 18px; height: 18px;
   border-radius: 4px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--paper-dim);
   cursor: pointer;
   font-size: 11px;
   line-height: 1;
@@ -334,8 +334,8 @@ html, body {
 /* ============ checkout panel ============ */
 
 .checkout-panel {
-  background: rgba(245,239,224,0.06);
-  border: 1px solid rgba(245,239,224,0.14);
+  background: rgba(242, 241, 239, 0.06);
+  border: 1px solid rgba(242, 241, 239, 0.14);
   border-radius: 16px;
   padding: 18px 20px 20px;
   display: flex;
@@ -345,7 +345,7 @@ html, body {
 
 .field-label {
   font-size: 12px;
-  color: var(--paper-dim);
+  color: var(--ink-soft);
   font-weight: 500;
   letter-spacing: 0.03em;
 }
@@ -353,19 +353,19 @@ html, body {
 .phone-input {
   padding: 13px 14px;
   border-radius: 10px;
-  border: 1.5px solid rgba(245,239,224,0.2);
-  background: rgba(245,239,224,0.08);
-  color: var(--paper);
+  border: 1.5px solid rgba(242, 241, 239, 0.2);
+  background: rgba(242, 241, 239, 0.08);
+  color: var(--ink);
   font-family: var(--font-mono);
   font-size: 15px;
   outline: none;
 }
-.phone-input::placeholder { color: rgba(245,239,224,0.4); }
-.phone-input:focus { border-color: var(--marigold); }
+.phone-input::placeholder { color: rgba(242, 241, 239, 0.4); }
+.phone-input:focus { border-color: var(--green); }
 
 .pay-btn {
   margin-top: 4px;
-  background: var(--marigold);
+  background: var(--green);
   border: none;
   border-radius: 12px;
   padding: 15px 18px;
@@ -386,7 +386,7 @@ html, body {
 }
 .pay-btn-sub {
   font-size: 11.5px;
-  color: rgba(20,67,44,0.7);
+  color: rgba(12, 12, 15, 0.65);
 }
 
 .pay-btn.loading .pay-btn-label::after {
@@ -399,35 +399,25 @@ html, body {
   font-size: 13px;
   font-weight: 500;
   line-height: 1.4;
+  background: rgba(242, 241, 239, 0.08);
+  border: 1px solid rgba(242, 241, 239, 0.18);
+  color: var(--ink);
 }
 .status-banner.hidden { display: none; }
-.status-banner.pending {
-  background: rgba(232,163,61,0.16);
-  color: var(--marigold);
-  border: 1px solid rgba(232,163,61,0.35);
-}
-.status-banner.success {
-  background: rgba(31,107,70,0.25);
-  color: #7fd9a8;
-  border: 1px solid rgba(127,217,168,0.35);
-}
-.status-banner.error {
-  background: rgba(181,72,42,0.2);
-  color: #f0a58c;
-  border: 1px solid rgba(240,165,140,0.35);
-}
+.status-banner.success { border-color: var(--ink); font-weight: 600; }
+.status-banner.error { border-style: dashed; }
 
 .clear-btn {
   background: none;
   border: none;
-  color: rgba(245,239,224,0.5);
+  color: rgba(242, 241, 239, 0.5);
   font-size: 12px;
   cursor: pointer;
   text-decoration: underline;
   padding: 4px 0;
   align-self: center;
 }
-.clear-btn:hover { color: var(--paper); }
+.clear-btn:hover { color: var(--ink); }
 
 @media (max-width: 860px) {
   .app { grid-template-columns: 1fr; }

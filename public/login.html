@@ -34,15 +34,15 @@
   .auth-form-panel h1 { font-family: var(--font-display); font-weight: 900; font-size: 28px; margin: 0 0 8px; color: var(--ink); }
   .auth-form-panel .auth-sub { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 28px; }
   .setup-banner {
-    background: rgba(217,154,43,0.15);
-    border: 1px solid rgba(217,154,43,0.4);
-    color: #8a5a1a;
+    background: var(--paper-dim);
+    border: 1px solid var(--line);
+    color: var(--ink);
     padding: 10px 14px; border-radius: 8px; font-size: 12.5px; margin-bottom: 18px; display: none;
   }
   .setup-banner.show { display: block; }
   .auth-error {
-    background: rgba(122,32,54,0.1);
-    border: 1px solid rgba(122,32,54,0.3);
+    background: var(--paper-dim);
+    border: 1px solid var(--line);
     color: var(--rust);
     padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none;
   }
@@ -70,17 +70,17 @@
     font-family: var(--font-display); font-weight: 700; font-size: 15px; cursor: pointer;
     transition: transform 0.12s, background 0.12s;
   }
-  .auth-submit:hover { background: var(--green-deep); transform: translateY(-1px); }
+  .auth-submit:hover { background: var(--green-deep); color: var(--ink); transform: translateY(-1px); }
   .auth-divider { display: flex; align-items: center; color: var(--ink-soft); font-size: 12px; margin: 22px 0 16px; }
   .auth-divider::before, .auth-divider::after { content: ""; flex: 1; border-bottom: 1px solid var(--line); }
   .auth-divider span { padding: 0 12px; }
   .social-row { display: flex; gap: 10px; justify-content: center; }
   .social-btn {
     width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line);
-    background: #fff; display: flex; align-items: center; justify-content: center;
+    background: var(--paper-dim); display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: box-shadow 0.12s, transform 0.12s;
   }
-  .social-btn:hover { box-shadow: 0 4px 12px rgba(42,27,18,0.12); transform: translateY(-1px); }
+  .social-btn:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.35); transform: translateY(-1px); }
 </style>
 </head>
 <body class="login-body">
@@ -96,7 +96,7 @@
     <p class="auth-sub" id="authSub">Sign in to get back to your till.</p>
 
     <div id="setupBanner" class="setup-banner">No account exists yet — create the owner login below to get started.</div>
-    <div id="googleNote" class="setup-banner" style="background:rgba(66,133,244,0.1);border-color:rgba(66,133,244,0.3);color:#1a56b0;">Google sign-in isn't configured yet.</div>
+    <div id="googleNote" class="setup-banner">Google sign-in isn't configured yet.</div>
     <div id="authError" class="auth-error"></div>
 
     <form id="authForm">

@@ -1,13 +1,13 @@
 :root {
-  --ink: #2a1b12;
-  --ink-soft: #6b4f3a;
-  --paper: #f9f0e1;
-  --paper-dim: #f0e0c4;
-  --green: #c1592f;
-  --green-deep: #8a3d1f;
-  --marigold: #d99a2b;
-  --rust: #7a2036;
-  --line: rgba(42, 27, 18, 0.14);
+  --ink: #f2f1ef;
+  --ink-soft: rgba(242, 241, 239, 0.6);
+  --paper: #18181A;
+  --paper-dim: #29292B;
+  --green: #f2f1ef;
+  --green-deep: #0C0C0F;
+  --marigold: #4C4C4E;
+  --rust: rgba(242, 241, 239, 0.7);
+  --line: #38383A;
 }
 
 * { box-sizing: border-box; }
@@ -15,7 +15,7 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
 
 .topbar {
   position: sticky; top: 0; z-index: 10;
-  background: rgba(245,239,224,0.92);
+  background: rgba(24,24,26,0.92);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--line);
 }
@@ -43,8 +43,8 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
 }
 .btn-ghost { color: var(--ink); border: 1.5px solid var(--line); }
 .btn-ghost:hover { border-color: var(--green); color: var(--green); }
-.btn-solid { background: var(--green); color: var(--paper); }
-.btn-solid:hover { background: var(--green-deep); transform: translateY(-1px); }
+.btn-solid { background: var(--green); color: var(--green-deep); }
+.btn-solid:hover { background: var(--green-deep); color: var(--ink); transform: translateY(-1px); }
 
 .hero {
   max-width: 1080px; margin: 0 auto;
@@ -59,7 +59,7 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
   font-size: 12.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--marigold);
+  color: var(--ink-soft);
   font-weight: 600;
   margin: 0 0 14px;
 }
@@ -82,7 +82,7 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
 
 .btn-google {
   display: flex; align-items: center; gap: 10px;
-  background: #fff;
+  background: var(--paper-dim);
   border: 1.5px solid var(--line);
   border-radius: 10px;
   padding: 13px 22px;
@@ -93,7 +93,7 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
   cursor: pointer;
   transition: box-shadow 0.12s, transform 0.12s;
 }
-.btn-google:hover { box-shadow: 0 6px 16px rgba(20,32,26,0.12); transform: translateY(-1px); }
+.btn-google:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.35); transform: translateY(-1px); }
 
 .link-alt {
   font-size: 13px;
@@ -106,7 +106,7 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
 .hero-art { width: 100%; }
 
 .features {
-  background: var(--ink);
+  background: var(--green-deep);
   padding: 64px 28px;
 }
 .feature-grid {
@@ -116,8 +116,8 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
   gap: 20px;
 }
 .feature-card {
-  background: rgba(245,239,224,0.06);
-  border: 1px solid rgba(245,239,224,0.12);
+  background: rgba(242,241,239,0.06);
+  border: 1px solid rgba(242,241,239,0.12);
   border-radius: 14px;
   padding: 24px 22px;
 }
@@ -126,13 +126,13 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
   font-family: "Fraunces", serif;
   font-weight: 700;
   font-size: 17px;
-  color: var(--paper);
+  color: var(--ink);
   margin: 0 0 8px;
 }
 .feature-card p {
   font-size: 13.5px;
   line-height: 1.55;
-  color: rgba(245,239,224,0.65);
+  color: rgba(242,241,239,0.65);
   margin: 0;
 }
 
