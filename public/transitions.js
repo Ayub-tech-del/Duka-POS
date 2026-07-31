@@ -1,6 +1,9 @@
-// Shared page-transition helper, loaded by every page (landing, login, pos, dashboard).
-// Each page has a #pageCurtain div as the first child of <body> (see transitions.css)
-// that swipes off on load and swipes back in before any internal navigation.
+// Shared page-transition engine, loaded by every page.
+// Each page owns its own visual technique via CSS (see the <style> block in each HTML file):
+//   - a #pageTransition overlay element for mask-type transitions (curtain, iris), or
+//   - the `body` element itself for content-type transitions (fade, slide & scale).
+// This file only knows the generic contract: an "enter" animation auto-plays on load,
+// and adding the `leaving` class triggers a "leave" animation before navigating.
 (function () {
   function prefersReducedMotion() {
     return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -8,13 +11,13 @@
 
   window.navigateWithFade = function navigateWithFade(url) {
     if (!url) return;
-    const curtain = document.getElementById('pageCurtain');
-    if (!curtain || prefersReducedMotion()) {
+    const target = document.getElementById('pageTransition') || document.body;
+    if (prefersReducedMotion()) {
       window.location.href = url;
       return;
     }
-    curtain.addEventListener('animationend', () => { window.location.href = url; }, { once: true });
-    curtain.classList.add('curtain-close');
+    target.addEventListener('animationend', () => { window.location.href = url; }, { once: true });
+    target.classList.add('leaving');
   };
 
   // Auto-intercept plain internal links (nav buttons, "Open POS till", etc.)

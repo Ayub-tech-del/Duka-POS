@@ -9,174 +9,105 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
-  .auth-wrap {
+  body.login-body {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--green-deep);
     padding: 24px;
-    position: relative;
+  }
+  .auth-shell {
+    width: 100%;
+    max-width: 900px;
+    min-height: 560px;
+    background: var(--paper);
+    border-radius: 26px;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     overflow: hidden;
   }
-  .auth-wrap::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle at 8px 5px, rgba(245,239,224,0.05) 4px, transparent 4.5px);
-    background-size: 32px 32px;
-    pointer-events: none;
-  }
-  .auth-card {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    background: var(--paper);
-    border-radius: 18px;
-    padding: 40px 34px 34px;
-    box-shadow: var(--shadow);
-  }
-  .auth-brand {
+  .auth-form-panel {
+    padding: 48px 44px;
     display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 6px;
+    flex-direction: column;
+    justify-content: center;
   }
-  .auth-mark {
-    width: 44px; height: 44px;
-    border-radius: 10px;
-    object-fit: contain;
-    flex-shrink: 0;
-    font-weight: 900;
-    font-size: 21px;
+  .auth-brand-row { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+  .auth-brand-row img { width: 30px; height: 30px; border-radius: 8px; }
+  .auth-brand-row span { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--ink-soft); }
+  .auth-form-panel h1 { font-family: var(--font-display); font-weight: 900; font-size: 30px; margin: 0 0 8px; color: var(--ink); }
+  .auth-form-panel .auth-sub { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 28px; }
+  .setup-banner {
+    background: rgba(217,154,43,0.15);
+    border: 1px solid rgba(217,154,43,0.4);
+    color: #8a5a1a;
+    padding: 10px 14px; border-radius: 8px; font-size: 12.5px; margin-bottom: 18px; display: none;
   }
-  .auth-brand h1 {
-    font-family: var(--font-display);
-    font-weight: 900;
-    font-size: 24px;
-    margin: 0;
-    color: var(--ink);
+  .setup-banner.show { display: block; }
+  .auth-error {
+    background: rgba(122,32,54,0.1);
+    border: 1px solid rgba(122,32,54,0.3);
+    color: var(--rust);
+    padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none;
   }
-  .auth-tag {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: 13px;
-    color: var(--ink-soft);
-    margin: 2px 0 28px 58px;
-  }
-  .google-btn {
-    width: 100%;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    background: #fff;
-    border: 1.5px solid var(--line);
-    border-radius: 10px;
-    padding: 12px;
-    font-family: var(--font-body);
-    font-weight: 500;
-    font-size: 14px;
-    color: var(--ink);
-    cursor: pointer;
-    margin-bottom: 18px;
-  }
-  .google-btn:hover { box-shadow: 0 4px 12px rgba(20,32,26,0.1); }
-  .divider {
-    display: flex; align-items: center;
-    text-align: center;
-    color: var(--ink-soft);
-    font-size: 12px;
-    margin: 0 0 20px;
-  }
-  .divider::before, .divider::after {
-    content: "";
-    flex: 1;
-    border-bottom: 1px solid var(--line);
-  }
-  .divider span { padding: 0 12px; }
-  .auth-field { margin-bottom: 16px; }
-  .auth-field label {
-    display: block;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--ink-soft);
-    margin-bottom: 6px;
-    letter-spacing: 0.02em;
-  }
+  .auth-error.show { display: block; }
+  .auth-field { margin-bottom: 14px; }
   .auth-field input {
-    width: 100%;
-    padding: 13px 14px;
-    border-radius: 10px;
-    border: 1.5px solid var(--line);
-    background: #fff;
-    font-family: var(--font-body);
-    font-size: 14.5px;
-    color: var(--ink);
-    outline: none;
+    width: 100%; padding: 13px 16px; border-radius: 10px; border: none;
+    background: var(--paper-dim); font-family: var(--font-body); font-size: 14.5px; color: var(--ink); outline: none;
   }
-  .auth-field input:focus { border-color: var(--green); }
+  .auth-field input::placeholder { color: var(--ink-soft); }
+  .auth-field input:focus { box-shadow: 0 0 0 2px var(--green); }
+  .auth-field.invalid input { box-shadow: 0 0 0 2px var(--rust); }
+  .password-wrap { position: relative; }
+  .password-wrap input { padding-right: 44px; }
+  .pw-toggle {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    width: 32px; height: 32px; border: none; background: none;
+    color: var(--ink-soft); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pw-toggle:hover { color: var(--ink); }
   .auth-submit {
-    width: 100%;
-    margin-top: 6px;
-    background: var(--green);
-    color: var(--paper);
-    border: none;
-    border-radius: 10px;
-    padding: 14px;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 15px;
-    cursor: pointer;
+    width: 100%; margin-top: 8px; background: var(--green); color: var(--paper);
+    border: none; border-radius: 10px; padding: 14px;
+    font-family: var(--font-display); font-weight: 700; font-size: 15px; cursor: pointer;
     transition: transform 0.12s, background 0.12s;
   }
   .auth-submit:hover { background: var(--green-deep); transform: translateY(-1px); }
-  .auth-error {
-    background: rgba(181,72,42,0.1);
-    border: 1px solid rgba(181,72,42,0.3);
-    color: var(--rust);
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 16px;
-    display: none;
+  .auth-divider { display: flex; align-items: center; color: var(--ink-soft); font-size: 12px; margin: 22px 0 16px; }
+  .auth-divider::before, .auth-divider::after { content: ""; flex: 1; border-bottom: 1px solid var(--line); }
+  .auth-divider span { padding: 0 12px; }
+  .social-row { display: flex; gap: 10px; justify-content: center; }
+  .social-btn {
+    width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line);
+    background: #fff; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: box-shadow 0.12s, transform 0.12s;
   }
-  .auth-error.show { display: block; }
-  .auth-toggle {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 13px;
-    color: var(--ink-soft);
-  }
-  .auth-toggle button {
-    background: none;
-    border: none;
-    color: var(--green);
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: underline;
-    font-size: 13px;
-  }
-  .setup-banner {
-    background: rgba(232,163,61,0.15);
-    border: 1px solid rgba(232,163,61,0.4);
-    color: #8a5a1a;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 12.5px;
-    margin-bottom: 18px;
-    display: none;
-  }
-  .setup-banner.show { display: block; }
+  .social-btn:hover { box-shadow: 0 4px 12px rgba(42,27,18,0.12); transform: translateY(-1px); }
 
-  .snake-trio {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translate(-50%, -72%);
-    display: flex;
-    align-items: flex-end;
-    gap: 14px;
-    z-index: 2;
-    pointer-events: none;
+  .auth-scene {
+    position: relative;
+    background: linear-gradient(180deg, #8a3d1f 0%, #c1592f 38%, #d99a2b 65%, #f0e0c4 100%);
+    overflow: hidden;
   }
+  .scene-sun { position: absolute; top: 46px; left: 50%; transform: translateX(-50%); width: 90px; height: 90px; border-radius: 50%; background: rgba(249,240,225,0.85); }
+  .scene-hill { position: absolute; left: -10%; width: 120%; border-radius: 50% 50% 0 0; background: var(--ink); }
+  .scene-hill.back { bottom: -6%; height: 46%; opacity: 0.55; }
+  .scene-hill.front { bottom: -10%; height: 34%; opacity: 0.85; }
+  .scene-stall {
+    position: absolute; bottom: 14%; width: 26px; height: 34px; background: var(--ink); opacity: 0.8;
+    clip-path: polygon(0 100%, 0 40%, 50% 10%, 100% 40%, 100% 100%);
+  }
+  .scene-caption {
+    position: absolute; left: 28px; right: 28px; bottom: 26px; color: var(--paper);
+    font-family: var(--font-display); font-weight: 700; font-size: 16px; line-height: 1.4;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+
+  .snake-trio { position: absolute; bottom: 15%; left: 50%; transform: translateX(-50%); display: flex; align-items: flex-end; gap: 18px; z-index: 2; }
   .snake { display: flex; flex-direction: column; align-items: center; transition: transform 0.15s ease; }
   .snake.shake { animation: snakeShake 0.5s ease; }
   .snake.jump { animation: snakeJump 0.6s ease; }
@@ -189,139 +120,118 @@
   }
   @keyframes snakeJump {
     0%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-16px); }
+    30% { transform: translateY(-18px); }
     55% { transform: translateY(2px); }
-    75% { transform: translateY(-6px); }
+    75% { transform: translateY(-7px); }
   }
-  .snake-body {
-    width: 30px;
-    border-radius: 15px 15px 6px 6px;
-    background: var(--green);
-  }
-  .snake.side-a .snake-body { background: var(--marigold); }
-  .snake.side-b .snake-body { background: var(--marigold); }
-  .snake.tall .snake-body { height: 74px; }
-  .snake.short .snake-body { height: 46px; }
+  .snake-body { width: 32px; border-radius: 16px 16px 6px 6px; background: var(--green); }
+  .snake.side-a .snake-body, .snake.side-b .snake-body { background: var(--paper); }
+  .snake.tall .snake-body { height: 78px; }
+  .snake.short .snake-body { height: 50px; }
   .snake-head {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    background: var(--green);
-    display: flex; align-items: center; justify-content: center;
-    gap: 6px;
-    position: relative;
-    margin-bottom: -6px;
+    width: 46px; height: 46px; border-radius: 50%; background: var(--green);
+    display: flex; align-items: center; justify-content: center; gap: 6px; position: relative; margin-bottom: -6px;
   }
-  .snake.side-a .snake-head, .snake.side-b .snake-head { background: var(--marigold); }
+  .snake.side-a .snake-head, .snake.side-b .snake-head { background: var(--paper); }
   .eye {
-    width: 15px; height: 15px;
-    background: var(--paper);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    transition: height 0.15s ease, transform 0.15s ease;
+    width: 16px; height: 16px; background: var(--paper); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; transition: height 0.15s ease;
   }
-  .pupil {
-    width: 7px; height: 7px;
-    background: var(--ink);
-    border-radius: 50%;
-    transition: transform 0.05s linear;
-  }
-  .snake.shy .eye { height: 3px; transform: translateY(0); }
+  .snake.side-a .eye, .snake.side-b .eye { background: var(--green-deep); }
+  .pupil { width: 7px; height: 7px; background: var(--ink); border-radius: 50%; transition: transform 0.05s linear; }
+  .snake.side-a .pupil, .snake.side-b .pupil { background: var(--paper); }
+  .snake.shy .eye { height: 3px; }
   .snake.shy .pupil { display: none; }
   .snake.shy .snake-head { transform: rotate(20deg); }
   .snake.side-a.shy .snake-head { transform: rotate(-24deg); }
   .snake.side-b.shy .snake-head { transform: rotate(24deg); }
   .snake-mouth {
-    position: absolute;
-    bottom: 8px;
-    width: 14px; height: 6px;
-    border-bottom: 2px solid var(--ink-soft);
-    border-radius: 0 0 8px 8px;
-    opacity: 0.6;
+    position: absolute; bottom: 9px; width: 15px; height: 6px;
+    border-bottom: 2px solid var(--green-deep); border-radius: 0 0 8px 8px; opacity: 0.6;
   }
-  .snake.happy .snake-mouth {
-    border-radius: 0 0 10px 10px;
-    border-color: var(--ink);
-    opacity: 1;
-  }
-  .snake.hurt .snake-mouth {
-    border-bottom: none;
-    border-top: 2px solid var(--rust);
-    border-radius: 8px 8px 0 0;
-    bottom: 6px;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .snake.shake, .snake.jump { animation: none; }
+  .snake.side-a .snake-mouth, .snake.side-b .snake-mouth { border-color: var(--ink-soft); }
+  .snake.happy .snake-mouth { border-radius: 0 0 10px 10px; opacity: 1; }
+  .snake.hurt .snake-mouth { border-bottom: none; border-top: 2px solid var(--rust); border-radius: 8px 8px 0 0; bottom: 7px; }
+  @media (prefers-reduced-motion: reduce) { .snake.shake, .snake.jump { animation: none; } }
+
+  @media (max-width: 720px) {
+    .auth-shell { grid-template-columns: 1fr; max-width: 420px; }
+    .auth-scene { min-height: 220px; order: -1; }
+    .auth-form-panel { padding: 36px 28px; }
   }
 </style>
 </head>
-<body>
+<body class="login-body">
 
-<div class="auth-wrap">
-  <div class="auth-card">
-    <div class="snake-trio" id="snakeTrio">
-      <div class="snake side-a short">
-        <div class="snake-head">
-          <div class="eye"><div class="pupil"></div></div>
-          <div class="eye"><div class="pupil"></div></div>
-          <div class="snake-mouth"></div>
-        </div>
-        <div class="snake-body"></div>
-      </div>
-      <div class="snake center tall">
-        <div class="snake-head">
-          <div class="eye"><div class="pupil"></div></div>
-          <div class="eye"><div class="pupil"></div></div>
-          <div class="snake-mouth"></div>
-        </div>
-        <div class="snake-body"></div>
-      </div>
-      <div class="snake side-b short">
-        <div class="snake-head">
-          <div class="eye"><div class="pupil"></div></div>
-          <div class="eye"><div class="pupil"></div></div>
-          <div class="snake-mouth"></div>
-        </div>
-        <div class="snake-body"></div>
-      </div>
-    </div>
+<div class="auth-shell">
 
-    <div class="auth-brand">
-      <img src="logo.svg" alt="Duka POS logo" class="auth-mark">
-      <h1>Duka POS</h1>
+  <div class="auth-form-panel">
+    <div class="auth-brand-row">
+      <img src="logo.svg" alt="Duka POS logo">
+      <span>Duka POS</span>
     </div>
-    <p class="auth-tag">Leo ni leo — get paid on the spot</p>
+    <h1 id="authHeading">Hello again</h1>
+    <p class="auth-sub" id="authSub">Sign in to get back to your till.</p>
 
     <div id="setupBanner" class="setup-banner">No account exists yet — create the owner login below to get started.</div>
-    <div id="googleNote" class="setup-banner" style="background:rgba(66,133,244,0.1);border-color:rgba(66,133,244,0.3);color:#1a56b0;">Google sign-in needs a Google Cloud OAuth client set up first — for now, use a username and password below.</div>
+    <div id="googleNote" class="setup-banner" style="background:rgba(66,133,244,0.1);border-color:rgba(66,133,244,0.3);color:#1a56b0;">Google sign-in isn't configured yet.</div>
     <div id="authError" class="auth-error"></div>
-
-    <button type="button" id="googleBtn" class="google-btn">
-      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.85 2.09-1.81 2.73v2.27h2.93C16.64 14.2 17.64 11.9 17.64 9.2z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.93-2.27c-.81.54-1.85.86-3.03.86-2.33 0-4.3-1.57-5.01-3.68H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.99 10.73c-.18-.54-.28-1.12-.28-1.73s.1-1.19.28-1.73V4.93H.96A8.996 8.996 0 000 9c0 1.45.35 2.83.96 4.07l3.03-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.6-2.6C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.93l3.03 2.34C4.7 5.15 6.67 3.58 9 3.58z"/></svg>
-      Continue with Google
-    </button>
-    <div class="divider"><span>or</span></div>
 
     <form id="authForm">
       <div class="auth-field" id="nameField" style="display:none">
-        <label for="name">Your name</label>
-        <input id="name" type="text" autocomplete="name" placeholder="e.g. Ayub">
+        <input id="name" type="text" autocomplete="name" placeholder="Your name">
       </div>
       <div class="auth-field">
-        <label for="username">Username</label>
-        <input id="username" type="text" autocomplete="username" required>
+        <input id="username" type="text" autocomplete="username" placeholder="Username" required>
       </div>
-      <div class="auth-field">
-        <label for="password">Password</label>
-        <input id="password" type="password" autocomplete="current-password" required>
+      <div class="auth-field" id="passwordField">
+        <div class="password-wrap">
+          <input id="password" type="password" autocomplete="current-password" placeholder="Password" required>
+          <button type="button" id="pwToggle" class="pw-toggle" aria-label="Show password">
+            <svg id="pwEyeOpen" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="pwEyeClosed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-7-11-7a20.4 20.4 0 015.06-5.94M9.9 4.24A10.9 10.9 0 0112 4c7 0 11 7 11 7a20.4 20.4 0 01-2.62 3.57M1 1l22 22"/></svg>
+          </button>
+        </div>
       </div>
       <button type="submit" class="auth-submit" id="submitBtn">Sign in</button>
     </form>
+
+    <div class="auth-divider"><span>or continue with</span></div>
+    <div class="social-row">
+      <button type="button" id="googleBtn" class="social-btn" aria-label="Continue with Google">
+        <svg width="20" height="20" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.85 2.09-1.81 2.73v2.27h2.93C16.64 14.2 17.64 11.9 17.64 9.2z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.93-2.27c-.81.54-1.85.86-3.03.86-2.33 0-4.3-1.57-5.01-3.68H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.99 10.73c-.18-.54-.28-1.12-.28-1.73s.1-1.19.28-1.73V4.93H.96A8.996 8.996 0 000 9c0 1.45.35 2.83.96 4.07l3.03-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.6-2.6C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.93l3.03 2.34C4.7 5.15 6.67 3.58 9 3.58z"/></svg>
+      </button>
+    </div>
   </div>
+
+  <div class="auth-scene">
+    <div class="scene-sun"></div>
+    <div class="scene-hill back"></div>
+    <div class="scene-stall" style="left:12%;"></div>
+    <div class="scene-stall" style="right:16%; bottom:16%;"></div>
+    <div class="scene-hill front"></div>
+
+    <div class="snake-trio" id="snakeTrio">
+      <div class="snake side-a short">
+        <div class="snake-head"><div class="eye"><div class="pupil"></div></div><div class="eye"><div class="pupil"></div></div><div class="snake-mouth"></div></div>
+        <div class="snake-body"></div>
+      </div>
+      <div class="snake center tall">
+        <div class="snake-head"><div class="eye"><div class="pupil"></div></div><div class="eye"><div class="pupil"></div></div><div class="snake-mouth"></div></div>
+        <div class="snake-body"></div>
+      </div>
+      <div class="snake side-b short">
+        <div class="snake-head"><div class="eye"><div class="pupil"></div></div><div class="eye"><div class="pupil"></div></div><div class="snake-mouth"></div></div>
+        <div class="snake-body"></div>
+      </div>
+    </div>
+
+    <p class="scene-caption">Get paid the moment they tap pay.</p>
+  </div>
+
 </div>
 
 <script>
-  // ---- Snake mascot behavior ----
-  const snakeTrio = document.getElementById('snakeTrio');
   const snakes = Array.from(document.querySelectorAll('.snake'));
   const usernameInput = document.getElementById('username');
   const passwordInput = document.getElementById('password');
@@ -342,13 +252,12 @@
   function updatePupils() {
     if (!document.querySelector('.snake.shy')) {
       snakes.forEach(snake => {
-        const pupils = snake.querySelectorAll('.pupil');
-        pupils.forEach(pupil => {
+        snake.querySelectorAll('.pupil').forEach(pupil => {
           const eyeRect = pupil.parentElement.getBoundingClientRect();
           const cx = eyeRect.left + eyeRect.width / 2;
           const cy = eyeRect.top + eyeRect.height / 2;
           const angle = Math.atan2(lookTarget.y - cy, lookTarget.x - cx);
-          const dist = Math.min(3.2, Math.hypot(lookTarget.x - cx, lookTarget.y - cy) / 20);
+          const dist = Math.min(3.4, Math.hypot(lookTarget.x - cx, lookTarget.y - cy) / 20);
           pupil.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px)`;
         });
       });
@@ -367,11 +276,33 @@
 
   passwordInput.addEventListener('focus', () => {
     following = false;
-    snakes.forEach(s => s.classList.add('shy'));
+    setLookTargetFromEl(passwordInput);
   });
-  passwordInput.addEventListener('blur', () => {
-    following = true;
-    snakes.forEach(s => s.classList.remove('shy'));
+  passwordInput.addEventListener('input', () => {
+    setLookTargetFromEl(passwordInput);
+    document.getElementById('passwordField').classList.remove('invalid');
+  });
+  passwordInput.addEventListener('blur', () => { following = true; });
+
+  const pwToggle = document.getElementById('pwToggle');
+  const pwEyeOpen = document.getElementById('pwEyeOpen');
+  const pwEyeClosed = document.getElementById('pwEyeClosed');
+  let pwRevealed = false;
+
+  pwToggle.addEventListener('click', () => {
+    pwRevealed = !pwRevealed;
+    passwordInput.type = pwRevealed ? 'text' : 'password';
+    pwEyeOpen.style.display = pwRevealed ? 'none' : 'block';
+    pwEyeClosed.style.display = pwRevealed ? 'block' : 'none';
+    pwToggle.setAttribute('aria-label', pwRevealed ? 'Hide password' : 'Show password');
+
+    if (pwRevealed) {
+      following = false;
+      snakes.forEach(s => s.classList.add('shy'));
+    } else {
+      snakes.forEach(s => s.classList.remove('shy'));
+      setLookTargetFromEl(passwordInput);
+    }
   });
 
   function reactShake() {
@@ -382,7 +313,6 @@
       setTimeout(() => s.classList.remove('hurt'), 1200);
     });
   }
-
   function reactHappy() {
     snakes.forEach(s => {
       s.classList.remove('hurt', 'shy');
@@ -390,12 +320,13 @@
     });
   }
 
-  // ---- Auth logic ----
   const form = document.getElementById('authForm');
   const errorBox = document.getElementById('authError');
   const setupBanner = document.getElementById('setupBanner');
   const nameField = document.getElementById('nameField');
   const submitBtn = document.getElementById('submitBtn');
+  const authHeading = document.getElementById('authHeading');
+  const authSub = document.getElementById('authSub');
   let needsSetup = false;
 
   const googleBtn = document.getElementById('googleBtn');
@@ -406,7 +337,6 @@
   }
   googleBtn.addEventListener('click', () => {
     googleNote.classList.add('show');
-    googleNote.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 
   fetch('/api/auth/needs-setup')
@@ -417,6 +347,8 @@
         setupBanner.classList.add('show');
         nameField.style.display = 'block';
         submitBtn.textContent = 'Create owner account';
+        authHeading.textContent = 'Set up your shop';
+        authSub.textContent = 'Create the owner account to get started.';
       }
     });
 
@@ -438,9 +370,11 @@
       if (!res.ok) {
         errorBox.textContent = data.error || 'Something went wrong';
         errorBox.classList.add('show');
+        document.getElementById('passwordField').classList.add('invalid');
         reactShake();
         return;
       }
+      document.getElementById('passwordField').classList.remove('invalid');
       reactHappy();
       setTimeout(() => {
         window.location.href = data.role === 'owner' ? '/dashboard.html' : '/pos.html';

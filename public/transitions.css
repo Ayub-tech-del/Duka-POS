@@ -1,47 +1,14 @@
-/* Shared page-transition animation, loaded by every page (landing, login, pos, dashboard).
-   A solid curtain panel covers the viewport on load and swipes off to reveal the page,
-   then swipes back in before any internal navigation. */
+/* Shared page-transition contract, loaded by every page.
+   Each page defines its OWN enter/leave keyframes for either `body` (content-type
+   transitions: fade, slide & scale) or `#pageTransition` (mask-type transitions: a
+   curtain/iris overlay) — see the <style> block in that page's own HTML. */
 
 :root {
   --page-transition-ease: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-#pageCurtain {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: var(--green-deep, #8a3d1f);
-  pointer-events: none;
-  animation: curtainOpen 560ms var(--page-transition-ease) both;
-}
-
-#pageCurtain::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: -6px;
-  width: 6px;
-  height: 100%;
-  background: var(--marigold, #d99a2b);
-  box-shadow: 0 0 24px 4px rgba(217, 154, 43, 0.55);
-}
-
-@keyframes curtainOpen {
-  from { transform: translateX(0); }
-  to   { transform: translateX(100%); }
-}
-
-@keyframes curtainClose {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(0); }
-}
-
-#pageCurtain.curtain-close {
-  animation: curtainClose 460ms var(--page-transition-ease) both;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  #pageCurtain {
+  body, #pageTransition, #pageTransition * {
     animation-duration: 0.001ms !important;
   }
 }
