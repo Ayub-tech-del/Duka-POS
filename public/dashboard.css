@@ -45,8 +45,8 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
   cursor: pointer;
 }
 .nav-item:hover { background: rgba(249,240,225,0.08); color: var(--paper); }
-.nav-icon { width: 14px; text-align: center; }
 .nav-item.active { background: var(--green); color: var(--paper); }
+.nav-icon { width: 16px; text-align: center; font-size: 13px; opacity: 0.85; }
 
 .sidebar-footer { display: flex; flex-direction: column; gap: 14px; padding-top: 16px; border-top: 1px solid rgba(249,240,225,0.14); }
 .pos-link { color: var(--marigold); font-size: 13px; font-weight: 600; text-decoration: none; }
