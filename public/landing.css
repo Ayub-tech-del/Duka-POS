@@ -1,13 +1,14 @@
 :root {
-  --ink: #2a1b12;
-  --ink-soft: #6b4f3a;
-  --paper: #f9f0e1;
-  --paper-dim: #f0e0c4;
-  --green: #c1592f;
-  --green-deep: #8a3d1f;
-  --marigold: #d99a2b;
-  --rust: #7a2036;
-  --line: rgba(42, 27, 18, 0.14);
+  /* Palette test: 4C4C4E / 38383A / 29292B / 18181A / 0C0C0F, plus an off-white for text. */
+  --ink: #f2f1ef;
+  --ink-soft: rgba(242, 241, 239, 0.6);
+  --paper: #18181A;
+  --paper-dim: rgba(242, 241, 239, 0.5);
+  --green: #ffffff;
+  --green-deep: #0C0C0F;
+  --marigold: #c9c9c7;
+  --rust: #38383A;
+  --line: #38383A;
 }
 
 * { box-sizing: border-box; }
@@ -15,7 +16,7 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
 
 .topbar {
   position: sticky; top: 0; z-index: 10;
-  background: rgba(245,239,224,0.92);
+  background: rgba(12,12,15,0.85);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--line);
 }
@@ -82,7 +83,7 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
 
 .btn-google {
   display: flex; align-items: center; gap: 10px;
-  background: #fff;
+  background: #29292B;
   border: 1.5px solid var(--line);
   border-radius: 10px;
   padding: 13px 22px;
@@ -106,7 +107,7 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
 .hero-art { width: 100%; }
 
 .features {
-  background: var(--ink);
+  background: var(--green-deep);
   padding: 64px 28px;
 }
 .feature-grid {
@@ -116,8 +117,8 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
   gap: 20px;
 }
 .feature-card {
-  background: rgba(245,239,224,0.06);
-  border: 1px solid rgba(245,239,224,0.12);
+  background: rgba(242,241,239,0.05);
+  border: 1px solid rgba(242,241,239,0.12);
   border-radius: 14px;
   padding: 24px 22px;
 }
@@ -126,13 +127,13 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
   font-family: "Fraunces", serif;
   font-weight: 700;
   font-size: 17px;
-  color: var(--paper);
+  color: var(--ink);
   margin: 0 0 8px;
 }
 .feature-card p {
   font-size: 13.5px;
   line-height: 1.55;
-  color: rgba(245,239,224,0.65);
+  color: rgba(242,241,239,0.65);
   margin: 0;
 }
 

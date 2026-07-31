@@ -49,7 +49,7 @@
   .auth-error {
     background: rgba(122,32,54,0.1);
     border: 1px solid rgba(122,32,54,0.3);
-    color: var(--rust);
+    color: #e08a76;
     padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none;
   }
   .auth-error.show { display: block; }
@@ -83,10 +83,10 @@
   .social-row { display: flex; gap: 10px; justify-content: center; }
   .social-btn {
     width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line);
-    background: #fff; display: flex; align-items: center; justify-content: center;
+    background: #29292B; display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: box-shadow 0.12s, transform 0.12s;
   }
-  .social-btn:hover { box-shadow: 0 4px 12px rgba(42,27,18,0.12); transform: translateY(-1px); }
+  .social-btn:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.4); transform: translateY(-1px); }
 
   .auth-scene {
     position: relative;
@@ -94,15 +94,15 @@
     overflow: hidden;
   }
   .scene-sun { position: absolute; top: 46px; left: 50%; transform: translateX(-50%); width: 90px; height: 90px; border-radius: 50%; background: rgba(249,240,225,0.85); }
-  .scene-hill { position: absolute; left: -10%; width: 120%; border-radius: 50% 50% 0 0; background: var(--ink); }
+  .scene-hill { position: absolute; left: -10%; width: 120%; border-radius: 50% 50% 0 0; background: #2a1b12; }
   .scene-hill.back { bottom: -6%; height: 46%; opacity: 0.55; }
   .scene-hill.front { bottom: -10%; height: 34%; opacity: 0.85; }
   .scene-stall {
-    position: absolute; bottom: 14%; width: 26px; height: 34px; background: var(--ink); opacity: 0.8;
+    position: absolute; bottom: 14%; width: 26px; height: 34px; background: #2a1b12; opacity: 0.8;
     clip-path: polygon(0 100%, 0 40%, 50% 10%, 100% 40%, 100% 100%);
   }
   .scene-caption {
-    position: absolute; left: 28px; right: 28px; bottom: 26px; color: var(--paper);
+    position: absolute; left: 28px; right: 28px; bottom: 26px; color: #f9f0e1;
     font-family: var(--font-display); font-weight: 700; font-size: 16px; line-height: 1.4;
     text-shadow: 0 2px 8px rgba(0,0,0,0.25);
   }
