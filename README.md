@@ -63,7 +63,9 @@ db.js                    → simple JSON-file data store (data.json is created o
 public/landing.html      → marketing homepage (illustrated hero, features, Google/login CTAs)
 public/login.html        → sign-in / first-run owner setup
 public/pos.html          → the till (product grid + till-roll receipt)
-public/dashboard.html    → owner dashboard shell (P&L, sales, products, staff) — dashboard.js/.css still pending
+public/dashboard.html    → owner dashboard shell (P&L, sales, products, staff)
+public/dashboard.js      → dashboard tabs, P&L/sales polling, product & staff CRUD
+public/dashboard.css     → dashboard layout (sidebar, stat cards, tables, modal)
 public/app.js            → POS cart logic, STK push call, payment polling
 public/style.css         → shared design system (till-roll receipt, product grid)
 .env.example             → credential template
