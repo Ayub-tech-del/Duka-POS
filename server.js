@@ -1,13 +1,23 @@
 require('dotenv').config();
-const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const session = require('express-session');
-const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
-const { OAuth2Client } = require('google-auth-library');
 const db = require('./db');
+
+const app = express();
+app.use(cors({ origin: true, credentials: true }));
+app.use(express.json());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'duka-pos-dev-secret-change-me',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 12 }, // 12 hours
+  })
+);
+app.use(express.static('public'));
 
 const {
   MPESA_ENV = 'sandbox',
@@ -17,72 +27,12 @@ const {
   MPESA_PASSKEY,
   MPESA_CALLBACK_URL,
   PORT = 3000,
-  NODE_ENV,
-  SESSION_SECRET,
-  ALLOWED_ORIGINS = '',
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  GOOGLE_CALLBACK_URL,
 } = process.env;
-
-const isProd = NODE_ENV === 'production';
-
-if (isProd && !SESSION_SECRET) {
-  console.error('SESSION_SECRET must be set in production. Refusing to start with an insecure default.');
-  process.exit(1);
-}
-if (!SESSION_SECRET) {
-  console.warn('WARNING: SESSION_SECRET is not set. Using an insecure dev default — set SESSION_SECRET in .env before deploying.');
-}
 
 const BASE_URL =
   MPESA_ENV === 'production'
     ? 'https://api.safaricom.co.ke'
     : 'https://sandbox.safaricom.co.ke';
-
-const app = express();
-
-// Needed so `cookie.secure` works correctly behind a reverse proxy/load balancer (e.g. Render, ngrok).
-if (isProd) app.set('trust proxy', 1);
-
-// Same-origin requests (no Origin header, or the app calling itself) always work.
-// Cross-origin credentialed requests are only allowed from hosts listed in ALLOWED_ORIGINS.
-const allowedOrigins = ALLOWED_ORIGINS.split(',').map(s => s.trim()).filter(Boolean);
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-}));
-app.use(express.json());
-app.use(
-  session({
-    secret: SESSION_SECRET || 'duka-pos-dev-secret-change-me',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 12, // 12 hours
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: isProd,
-    },
-  })
-);
-app.use(express.static('public'));
-
-// Brute-force guard on login/setup/staff-creation — 20 attempts per 15 minutes per IP.
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many attempts. Please wait a few minutes and try again.' },
-});
-
-const googleClient = GOOGLE_CLIENT_ID
-  ? new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL)
-  : null;
 
 // Pending STK pushes, keyed by CheckoutRequestID, so the callback knows what sale to finalize
 const pendingCheckouts = {};
@@ -141,16 +91,16 @@ function publicUser(u) {
 // ---- Auth routes ----------------------------------------------------------
 
 // First-run setup: only works when there are zero users yet
-app.post('/api/auth/setup', authLimiter, async (req, res) => {
+app.post('/api/auth/setup', async (req, res) => {
   const data = db.load();
   if (data.users.length > 0) {
     return res.status(400).json({ error: 'Setup already completed. Log in instead.' });
   }
-  const { username, password, name, email } = req.body;
+  const { username, password, name } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'username and password required' });
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const owner = { id: 1, username, passwordHash, role: 'owner', name: name || username, email: email ? email.toLowerCase() : undefined };
+  const owner = { id: 1, username, passwordHash, role: 'owner', name: name || username };
   data.users.push(owner);
   db.save(data);
   req.session.user = publicUser(owner);
@@ -162,92 +112,17 @@ app.get('/api/auth/needs-setup', (req, res) => {
   res.json({ needsSetup: data.users.length === 0 });
 });
 
-app.post('/api/auth/login', authLimiter, async (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
   const data = db.load();
   const user = data.users.find(u => u.username.toLowerCase() === (username || '').toLowerCase());
   if (!user) return res.status(401).json({ error: 'Invalid username or password' });
-
-  if (!user.passwordHash) return res.status(401).json({ error: 'This account signs in with Google only.' });
 
   const ok = await bcrypt.compare(password || '', user.passwordHash);
   if (!ok) return res.status(401).json({ error: 'Invalid username or password' });
 
   req.session.user = publicUser(user);
   res.json(publicUser(user));
-});
-
-// ---- Google OAuth ----------------------------------------------------------
-
-app.get('/api/auth/google', (req, res) => {
-  if (!googleClient) return res.redirect('/login.html?error=google_not_configured');
-
-  const state = crypto.randomBytes(16).toString('hex');
-  req.session.oauthState = state;
-  const url = googleClient.generateAuthUrl({
-    access_type: 'online',
-    scope: ['openid', 'email', 'profile'],
-    state,
-  });
-  res.redirect(url);
-});
-
-app.get('/api/auth/google/callback', async (req, res) => {
-  if (!googleClient) return res.redirect('/login.html?error=google_not_configured');
-
-  const { code, state } = req.query;
-  const expectedState = req.session.oauthState;
-  delete req.session.oauthState;
-
-  if (!code || !state || state !== expectedState) {
-    return res.redirect('/login.html?error=google_failed');
-  }
-
-  try {
-    const { tokens } = await googleClient.getToken(code);
-    const ticket = await googleClient.verifyIdToken({
-      idToken: tokens.id_token,
-      audience: GOOGLE_CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
-    if (!payload.email_verified) return res.redirect('/login.html?error=google_unverified_email');
-
-    const email = payload.email.toLowerCase();
-    const data = db.load();
-
-    let user = data.users.find(u => u.googleId === payload.sub);
-
-    if (!user) {
-      user = data.users.find(u => u.email && u.email.toLowerCase() === email);
-      if (user) {
-        user.googleId = payload.sub;
-        db.save(data);
-      }
-    }
-
-    if (!user && data.users.length === 0) {
-      user = {
-        id: 1,
-        username: email,
-        googleId: payload.sub,
-        email,
-        role: 'owner',
-        name: payload.name || email,
-      };
-      data.users.push(user);
-      db.save(data);
-    }
-
-    if (!user) {
-      return res.redirect('/login.html?error=google_no_account');
-    }
-
-    req.session.user = publicUser(user);
-    res.redirect(user.role === 'owner' ? '/dashboard.html' : '/pos.html');
-  } catch (err) {
-    console.error('Google OAuth error:', err.message);
-    res.redirect('/login.html?error=google_failed');
-  }
 });
 
 app.post('/api/auth/logout', (req, res) => {
@@ -260,8 +135,8 @@ app.get('/api/auth/me', (req, res) => {
 });
 
 // Owner creates a staff account
-app.post('/api/staff', requireOwner, authLimiter, async (req, res) => {
-  const { username, password, name, email } = req.body;
+app.post('/api/staff', requireOwner, async (req, res) => {
+  const { username, password, name } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'username and password required' });
 
   const data = db.load();
@@ -270,7 +145,7 @@ app.post('/api/staff', requireOwner, authLimiter, async (req, res) => {
   }
   const passwordHash = await bcrypt.hash(password, 10);
   const newId = Math.max(...data.users.map(u => u.id), 0) + 1;
-  const staff = { id: newId, username, passwordHash, role: 'staff', name: name || username, email: email ? email.toLowerCase() : undefined };
+  const staff = { id: newId, username, passwordHash, role: 'staff', name: name || username };
   data.users.push(staff);
   db.save(data);
   res.json(publicUser(staff));

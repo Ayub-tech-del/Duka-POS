@@ -104,10 +104,8 @@ html, body {
   font-size: 12px;
   color: var(--ink-soft);
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, transform 0.1s;
 }
 .logout-link:hover { border-color: var(--rust); color: var(--rust); }
-.logout-link:active { transform: scale(0.96); }
 
 .search input {
   width: 260px;
@@ -148,7 +146,6 @@ html, body {
   border-color: var(--green);
   color: var(--paper);
 }
-.cat-pill:active { transform: scale(0.95); }
 
 .grid {
   display: grid;
@@ -173,15 +170,7 @@ html, body {
   box-shadow: 0 10px 24px rgba(20,32,26,0.14);
   border-color: var(--green);
 }
-.product-card:active { transform: translateY(0) scale(0.97); }
-
-@keyframes cardBump {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.06); box-shadow: 0 14px 28px rgba(20,32,26,0.22); }
-  65% { transform: scale(0.985); }
-  100% { transform: scale(1); }
-}
-.product-card.card-bump { animation: cardBump 0.38s ease; }
+.product-card:active { transform: translateY(0); }
 
 .product-emoji {
   font-size: 28px;
@@ -253,40 +242,6 @@ html, body {
 .perforation.top { top: -5px; }
 .perforation.bottom { bottom: -5px; }
 
-.paid-stamp {
-  position: absolute;
-  top: 42%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-12deg) scale(0.6);
-  opacity: 0;
-  pointer-events: none;
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 34px;
-  letter-spacing: 0.14em;
-  color: var(--rust);
-  border: 4px solid var(--rust);
-  border-radius: 10px;
-  padding: 6px 18px;
-  z-index: 5;
-}
-@keyframes stampIn {
-  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-24deg) scale(2.4); }
-  55% { opacity: 0.9; transform: translate(-50%, -50%) rotate(-10deg) scale(0.92); }
-  75% { opacity: 0.9; transform: translate(-50%, -50%) rotate(-13deg) scale(1.06); }
-  100% { opacity: 0.9; transform: translate(-50%, -50%) rotate(-12deg) scale(1); }
-}
-.paid-stamp.show { animation: stampIn 0.55s cubic-bezier(0.2, 1.6, 0.4, 1) forwards; }
-
-@keyframes tillShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-4px) rotate(-0.3deg); }
-  40% { transform: translateX(3px) rotate(0.2deg); }
-  60% { transform: translateX(-2px); }
-  80% { transform: translateX(1px); }
-}
-.till-roll.stamped { animation: tillShake 0.4s ease 0.4s; }
-
 .till-head {
   text-align: center;
   border-bottom: 1px dashed var(--line);
@@ -330,24 +285,6 @@ html, body {
   gap: 8px;
 }
 
-@keyframes tillLineEnter {
-  0% { opacity: 0; transform: translateX(28px); }
-  100% { opacity: 1; transform: translateX(0); }
-}
-.till-line-enter { animation: tillLineEnter 0.32s cubic-bezier(0.2, 0.9, 0.3, 1); }
-
-@keyframes tillLineExit {
-  0% { opacity: 1; transform: translateX(0); }
-  100% { opacity: 0; transform: translateX(28px); }
-}
-.till-line-exit { animation: tillLineExit 0.22s ease forwards; pointer-events: none; }
-
-@keyframes tillLinePulse {
-  0% { background: rgba(193,89,47,0.18); }
-  100% { background: transparent; }
-}
-.till-line-pulse { animation: tillLinePulse 0.5s ease; }
-
 .till-line-name { flex: 1; color: var(--ink); }
 .till-line-qty { color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
 
@@ -361,10 +298,8 @@ html, body {
   line-height: 1;
   display: flex; align-items: center; justify-content: center;
   color: var(--ink);
-  transition: transform 0.1s ease, border-color 0.15s, color 0.15s;
 }
 .qty-btn:hover { border-color: var(--green); color: var(--green); }
-.qty-btn:active { transform: scale(0.85); }
 
 .till-line-amt { font-weight: 600; color: var(--ink); min-width: 64px; text-align: right; }
 
@@ -434,8 +369,7 @@ html, body {
   gap: 2px;
   transition: transform 0.12s, opacity 0.12s;
 }
-.pay-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(217,154,43,0.35); }
-.pay-btn:active:not(:disabled) { transform: translateY(0) scale(0.98); box-shadow: none; }
+.pay-btn:hover:not(:disabled) { transform: translateY(-2px); }
 .pay-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .pay-btn-label {
   font-family: var(--font-display);
@@ -469,11 +403,6 @@ html, body {
   background: rgba(31,107,70,0.25);
   color: #7fd9a8;
   border: 1px solid rgba(127,217,168,0.35);
-  animation: bannerPop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1);
-}
-@keyframes bannerPop {
-  0% { transform: scale(0.92); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
 }
 .status-banner.error {
   background: rgba(181,72,42,0.2);
@@ -490,7 +419,6 @@ html, body {
   text-decoration: underline;
   padding: 4px 0;
   align-self: center;
-  transition: color 0.15s;
 }
 .clear-btn:hover { color: var(--paper); }
 
