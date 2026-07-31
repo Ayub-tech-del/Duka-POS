@@ -19,25 +19,19 @@
   }
   .auth-shell {
     width: 100%;
-    max-width: 900px;
-    min-height: 560px;
+    max-width: 420px;
     background: var(--paper);
-    border-radius: 26px;
+    border-radius: 20px;
     box-shadow: var(--shadow);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     overflow: hidden;
   }
   .auth-form-panel {
-    padding: 48px 44px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    padding: 44px 40px;
   }
   .auth-brand-row { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
   .auth-brand-row img { width: 30px; height: 30px; border-radius: 8px; }
   .auth-brand-row span { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--ink-soft); }
-  .auth-form-panel h1 { font-family: var(--font-display); font-weight: 900; font-size: 30px; margin: 0 0 8px; color: var(--ink); }
+  .auth-form-panel h1 { font-family: var(--font-display); font-weight: 900; font-size: 28px; margin: 0 0 8px; color: var(--ink); }
   .auth-form-panel .auth-sub { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 28px; }
   .setup-banner {
     background: rgba(217,154,43,0.15);
@@ -87,45 +81,6 @@
     cursor: pointer; transition: box-shadow 0.12s, transform 0.12s;
   }
   .social-btn:hover { box-shadow: 0 4px 12px rgba(42,27,18,0.12); transform: translateY(-1px); }
-
-  .auth-scene {
-    position: relative;
-    background: linear-gradient(180deg, #8a3d1f 0%, #c1592f 38%, #d99a2b 65%, #f0e0c4 100%);
-    overflow: hidden;
-  }
-  .scene-sun { position: absolute; top: 46px; left: 50%; transform: translateX(-50%); width: 90px; height: 90px; border-radius: 50%; background: rgba(249,240,225,0.85); }
-  .scene-hill { position: absolute; left: -10%; width: 120%; border-radius: 50% 50% 0 0; background: var(--ink); }
-  .scene-hill.back { bottom: -6%; height: 46%; opacity: 0.55; }
-  .scene-hill.front { bottom: -10%; height: 34%; opacity: 0.85; }
-  .scene-stall {
-    position: absolute; bottom: 14%; width: 26px; height: 34px; background: var(--ink); opacity: 0.8;
-    clip-path: polygon(0 100%, 0 40%, 50% 10%, 100% 40%, 100% 100%);
-  }
-  .scene-caption {
-    position: absolute; left: 28px; right: 28px; bottom: 26px; color: var(--paper);
-    font-family: var(--font-display); font-weight: 700; font-size: 16px; line-height: 1.4;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
-  }
-
-  .scene-text {
-    position: absolute; left: 40px; right: 40px; top: 50%; transform: translateY(-50%);
-    color: var(--paper);
-  }
-  .scene-text h2 {
-    font-family: var(--font-display); font-weight: 900; font-size: 26px;
-    line-height: 1.25; margin: 0 0 12px;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.25);
-  }
-  .scene-text p {
-    font-size: 14px; line-height: 1.6; opacity: 0.92; margin: 0;
-    text-shadow: 0 1px 6px rgba(0,0,0,0.2);
-  }
-
-  @media (max-width: 720px) {
-    .auth-shell { grid-template-columns: 1fr; max-width: 420px; }
-    .auth-scene { min-height: 220px; order: -1; }
-    .auth-form-panel { padding: 36px 28px; }
-  }
 </style>
 </head>
 <body class="login-body">
@@ -171,75 +126,11 @@
     </div>
   </div>
 
-  <div class="auth-scene">
-    <div class="scene-sun"></div>
-    <div class="scene-hill back"></div>
-    <div class="scene-stall" style="left:12%;"></div>
-    <div class="scene-stall" style="right:16%; bottom:16%;"></div>
-    <div class="scene-hill front"></div>
-
-    <div class="scene-text">
-      <h2>Get paid the moment they tap pay.</h2>
-      <p>M-Pesa STK push, automatic bookkeeping, and real profit tracking — built for your duka.</p>
-    </div>
-
-    <p class="scene-caption">Leo ni leo — get paid on the spot.</p>
-  </div>
-
 </div>
 
 <script>
-  const snakes = Array.from(document.querySelectorAll('.blob'));
   const usernameInput = document.getElementById('username');
   const passwordInput = document.getElementById('password');
-
-  let lookTarget = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-  let following = true;
-
-  function setLookTargetFromEl(el) {
-    const r = el.getBoundingClientRect();
-    lookTarget = { x: r.left + r.width / 2, y: r.top };
-  }
-
-  document.addEventListener('mousemove', (e) => {
-    if (!following) return;
-    lookTarget = { x: e.clientX, y: e.clientY };
-  });
-
-  function updatePupils() {
-    if (!document.querySelector('.blob.shy')) {
-      snakes.forEach(snake => {
-        snake.querySelectorAll('.b-pupil').forEach(pupil => {
-          const eyeRect = pupil.parentElement.getBoundingClientRect();
-          const cx = eyeRect.left + eyeRect.width / 2;
-          const cy = eyeRect.top + eyeRect.height / 2;
-          const angle = Math.atan2(lookTarget.y - cy, lookTarget.x - cx);
-          const dist = Math.min(3.4, Math.hypot(lookTarget.x - cx, lookTarget.y - cy) / 20);
-          pupil.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px)`;
-        });
-      });
-    }
-    requestAnimationFrame(updatePupils);
-  }
-  requestAnimationFrame(updatePupils);
-
-  usernameInput.addEventListener('focus', () => {
-    following = false;
-    setLookTargetFromEl(usernameInput);
-    snakes.forEach(s => s.classList.remove('shy'));
-  });
-  usernameInput.addEventListener('input', () => setLookTargetFromEl(usernameInput));
-  usernameInput.addEventListener('blur', () => { following = true; });
-
-  passwordInput.addEventListener('focus', () => {
-    following = false;
-    setLookTargetFromEl(passwordInput);
-  });
-  passwordInput.addEventListener('input', () => {
-    setLookTargetFromEl(passwordInput);
-    document.getElementById('passwordField').classList.remove('invalid');
-  });
-  passwordInput.addEventListener('blur', () => { following = true; });
 
   const pwToggle = document.getElementById('pwToggle');
   const pwEyeOpen = document.getElementById('pwEyeOpen');
@@ -252,30 +143,11 @@
     pwEyeOpen.style.display = pwRevealed ? 'none' : 'block';
     pwEyeClosed.style.display = pwRevealed ? 'block' : 'none';
     pwToggle.setAttribute('aria-label', pwRevealed ? 'Hide password' : 'Show password');
-
-    if (pwRevealed) {
-      following = false;
-      snakes.forEach(s => s.classList.add('shy'));
-    } else {
-      snakes.forEach(s => s.classList.remove('shy'));
-      setLookTargetFromEl(passwordInput);
-    }
   });
 
-  function reactShake() {
-    snakes.forEach(s => {
-      s.classList.remove('happy');
-      s.classList.add('hurt', 'shake');
-      setTimeout(() => s.classList.remove('shake'), 500);
-      setTimeout(() => s.classList.remove('hurt'), 1200);
-    });
-  }
-  function reactHappy() {
-    snakes.forEach(s => {
-      s.classList.remove('hurt', 'shy');
-      s.classList.add('happy', 'jump');
-    });
-  }
+  passwordInput.addEventListener('input', () => {
+    document.getElementById('passwordField').classList.remove('invalid');
+  });
 
   const form = document.getElementById('authForm');
   const errorBox = document.getElementById('authError');
@@ -328,18 +200,15 @@
         errorBox.textContent = data.error || 'Something went wrong';
         errorBox.classList.add('show');
         document.getElementById('passwordField').classList.add('invalid');
-        reactShake();
         return;
       }
       document.getElementById('passwordField').classList.remove('invalid');
-      reactHappy();
       setTimeout(() => {
         window.location.href = data.role === 'owner' ? '/dashboard.html' : '/pos.html';
       }, 550);
     } catch (err) {
       errorBox.textContent = 'Could not reach the server.';
       errorBox.classList.add('show');
-      reactShake();
     }
   });
 </script>
