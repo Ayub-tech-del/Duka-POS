@@ -14,7 +14,7 @@ app.use(
     secret: process.env.SESSION_SECRET || 'duka-pos-dev-secret-change-me',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 12 }, // 12 hours
+    cookie: { maxAge: 1000 * 60 * 60 * 12 },
   })
 );
 app.use(express.static('public'));
@@ -26,6 +26,9 @@ const {
   MPESA_SHORTCODE,
   MPESA_PASSKEY,
   MPESA_CALLBACK_URL,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_CALLBACK_URL,
   PORT = 3000,
 } = process.env;
 
@@ -34,10 +37,7 @@ const BASE_URL =
     ? 'https://api.safaricom.co.ke'
     : 'https://sandbox.safaricom.co.ke';
 
-// Pending STK pushes, keyed by CheckoutRequestID, so the callback knows what sale to finalize
 const pendingCheckouts = {};
-
-// ---- M-Pesa helpers ------------------------------------------------------
 
 function timestamp() {
   const d = new Date();
@@ -53,10 +53,7 @@ function timestamp() {
 }
 
 async function getAccessToken() {
-  const auth = Buffer.from(
-    `${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`
-  ).toString('base64');
-
+  const auth = Buffer.from(`${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`).toString('base64');
   const { data } = await axios.get(
     `${BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
     { headers: { Authorization: `Basic ${auth}` } }
@@ -70,8 +67,6 @@ function normalizePhone(raw) {
   if (phone.startsWith('7') || phone.startsWith('1')) phone = '254' + phone;
   return phone;
 }
-
-// ---- Auth helpers ---------------------------------------------------------
 
 function requireAuth(req, res, next) {
   if (!req.session.user) return res.status(401).json({ error: 'Not logged in' });
@@ -90,17 +85,16 @@ function publicUser(u) {
 
 // ---- Auth routes ----------------------------------------------------------
 
-// First-run setup: only works when there are zero users yet
 app.post('/api/auth/setup', async (req, res) => {
   const data = db.load();
   if (data.users.length > 0) {
     return res.status(400).json({ error: 'Setup already completed. Log in instead.' });
   }
-  const { username, password, name } = req.body;
+  const { username, password, name, email } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'username and password required' });
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const owner = { id: 1, username, passwordHash, role: 'owner', name: name || username };
+  const owner = { id: 1, username, passwordHash, role: 'owner', name: name || username, email: email || null };
   data.users.push(owner);
   db.save(data);
   req.session.user = publicUser(owner);
@@ -117,6 +111,7 @@ app.post('/api/auth/login', async (req, res) => {
   const data = db.load();
   const user = data.users.find(u => u.username.toLowerCase() === (username || '').toLowerCase());
   if (!user) return res.status(401).json({ error: 'Invalid username or password' });
+  if (!user.passwordHash) return res.status(401).json({ error: 'This account signs in with Google only.' });
 
   const ok = await bcrypt.compare(password || '', user.passwordHash);
   if (!ok) return res.status(401).json({ error: 'Invalid username or password' });
@@ -134,9 +129,78 @@ app.get('/api/auth/me', (req, res) => {
   res.json(req.session.user);
 });
 
+// ---- Google OAuth ----------------------------------------------------------
+
+app.get('/api/auth/google', (req, res) => {
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CALLBACK_URL) {
+    return res.redirect('/login.html?google=1');
+  }
+  const state = Math.random().toString(36).slice(2);
+  req.session.oauthState = state;
+
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: GOOGLE_CALLBACK_URL,
+    response_type: 'code',
+    scope: 'openid email profile',
+    state,
+    prompt: 'select_account',
+  });
+  res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+});
+
+app.get('/api/auth/google/callback', async (req, res) => {
+  try {
+    const { code, state } = req.query;
+    if (!code || !state || state !== req.session.oauthState) {
+      return res.redirect('/login.html?google=error');
+    }
+    delete req.session.oauthState;
+
+    const { data: tokenData } = await axios.post('https://oauth2.googleapis.com/token', {
+      code,
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      redirect_uri: GOOGLE_CALLBACK_URL,
+      grant_type: 'authorization_code',
+    });
+
+    const { data: profile } = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+
+    const data = db.load();
+    let user = data.users.find(u => u.googleId === profile.sub);
+    if (!user) user = data.users.find(u => u.email && u.email.toLowerCase() === profile.email.toLowerCase());
+
+    if (!user) {
+      if (data.users.length === 0) {
+        // First account ever created — make them the owner
+        const newId = 1;
+        user = { id: newId, username: profile.email, googleId: profile.sub, email: profile.email, role: 'owner', name: profile.name || profile.email };
+        data.users.push(user);
+        db.save(data);
+      } else {
+        return res.redirect('/login.html?google=notfound');
+      }
+    } else if (!user.googleId) {
+      user.googleId = profile.sub;
+      db.save(data);
+    }
+
+    req.session.user = publicUser(user);
+    res.redirect(user.role === 'owner' ? '/dashboard.html' : '/pos.html');
+  } catch (err) {
+    console.error('--- GOOGLE OAUTH ERROR ---');
+    console.error(err.response?.data || err.message);
+    console.error('--------------------------');
+    res.redirect('/login.html?google=error');
+  }
+});
+
 // Owner creates a staff account
 app.post('/api/staff', requireOwner, async (req, res) => {
-  const { username, password, name } = req.body;
+  const { username, password, name, email } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'username and password required' });
 
   const data = db.load();
@@ -145,7 +209,7 @@ app.post('/api/staff', requireOwner, async (req, res) => {
   }
   const passwordHash = await bcrypt.hash(password, 10);
   const newId = Math.max(...data.users.map(u => u.id), 0) + 1;
-  const staff = { id: newId, username, passwordHash, role: 'staff', name: name || username };
+  const staff = { id: newId, username, passwordHash, role: 'staff', name: name || username, email: email || null };
   data.users.push(staff);
   db.save(data);
   res.json(publicUser(staff));
@@ -175,7 +239,6 @@ app.get('/api/products', requireAuth, (req, res) => {
   res.json(data.products);
 });
 
-// Owner sets price / cost price per product
 app.put('/api/products/:id', requireOwner, (req, res) => {
   const data = db.load();
   const id = Number(req.params.id);
@@ -216,7 +279,6 @@ app.delete('/api/products/:id', requireOwner, (req, res) => {
 app.post('/api/stkpush', requireAuth, async (req, res) => {
   try {
     const { phone, cart, accountRef = 'Duka POS', description = 'Sale' } = req.body;
-    // cart: [{ productId, qty }]
 
     if (!phone || !Array.isArray(cart) || cart.length === 0) {
       return res.status(400).json({ error: 'phone and a non-empty cart are required' });
@@ -280,7 +342,6 @@ app.post('/api/stkpush', requireAuth, async (req, res) => {
   }
 });
 
-// Safaricom calls this directly. Must be a public HTTPS URL (ngrok in dev).
 app.post('/api/mpesa/callback', (req, res) => {
   const body = req.body?.Body?.stkCallback;
   if (body) {
@@ -292,7 +353,6 @@ app.post('/api/mpesa/callback', (req, res) => {
       pending.resultDesc = ResultDesc;
 
       if (ResultCode === 0) {
-        // Record the completed sale for bookkeeping / P&L
         const data = db.load();
         const sale = {
           id: data.nextSaleId++,
@@ -319,16 +379,12 @@ app.get('/api/status/:checkoutRequestId', requireAuth, (req, res) => {
   res.json(tx);
 });
 
-// ---- Bookkeeping / sales history ----------------------------------------
-
 app.get('/api/sales', requireAuth, (req, res) => {
   const data = db.load();
   const isOwner = req.session.user.role === 'owner';
   const sales = isOwner ? data.sales : data.sales.filter(s => s.userId === req.session.user.id);
   res.json(sales.slice().reverse());
 });
-
-// ---- P&L report (owner only) --------------------------------------------
 
 app.get('/api/reports/pl', requireOwner, (req, res) => {
   const data = db.load();
