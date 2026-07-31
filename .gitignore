@@ -1,6 +1,11 @@
 node_modules/
 .env
 data.json
+data.json.migrated
+kenya-pos.db
+kenya-pos.db-journal
+kenya-pos.db-wal
+kenya-pos.db-shm
 .DS_Store
 public/uploads/*
 !public/uploads/.gitkeep

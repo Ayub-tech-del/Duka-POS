@@ -116,12 +116,14 @@ app.post('/api/auth/setup', async (req, res) => {
   if (data.users.length > 0) {
     return res.status(400).json({ error: 'Setup already completed. Log in instead.' });
   }
-  const { username, password, name, email } = req.body;
+  const { username, password, name, email, shopName } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'username and password required' });
+  if (!shopName || !shopName.trim()) return res.status(400).json({ error: 'shop name required' });
 
   const passwordHash = await bcrypt.hash(password, 10);
   const owner = { id: 1, username, passwordHash, role: 'owner', name: name || username, email: email || null };
   data.users.push(owner);
+  data.shop = { name: shopName.trim() };
   db.save(data);
   req.session.user = publicUser(owner);
   res.json(publicUser(owner));
@@ -130,6 +132,11 @@ app.post('/api/auth/setup', async (req, res) => {
 app.get('/api/auth/needs-setup', (req, res) => {
   const data = db.load();
   res.json({ needsSetup: data.users.length === 0 });
+});
+
+app.get('/api/shop', requireAuth, (req, res) => {
+  const data = db.load();
+  res.json({ name: data.shop?.name || null });
 });
 
 app.post('/api/auth/login', async (req, res) => {

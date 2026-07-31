@@ -217,6 +217,10 @@ async function boot() {
     const me = await meRes.json();
     userNameEl.textContent = `${me.name} (${me.role})`;
 
+    fetch('/api/shop').then(r => r.json()).then(({ name }) => {
+      if (name) document.getElementById('shopTagline').textContent = name;
+    }).catch(() => {});
+
     const prodRes = await fetch('/api/products');
     PRODUCTS = await prodRes.json();
 

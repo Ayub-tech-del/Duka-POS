@@ -100,6 +100,9 @@
     <div id="authError" class="auth-error"></div>
 
     <form id="authForm">
+      <div class="auth-field" id="shopField" style="display:none">
+        <input id="shopName" type="text" autocomplete="organization" placeholder="Shop / business name">
+      </div>
       <div class="auth-field" id="nameField" style="display:none">
         <input id="name" type="text" autocomplete="name" placeholder="Your name">
       </div>
@@ -153,6 +156,8 @@
   const errorBox = document.getElementById('authError');
   const setupBanner = document.getElementById('setupBanner');
   const nameField = document.getElementById('nameField');
+  const shopField = document.getElementById('shopField');
+  const shopInput = document.getElementById('shopName');
   const submitBtn = document.getElementById('submitBtn');
   const authHeading = document.getElementById('authHeading');
   const authSub = document.getElementById('authSub');
@@ -175,6 +180,8 @@
       if (ns) {
         setupBanner.classList.add('show');
         nameField.style.display = 'block';
+        shopField.style.display = 'block';
+        shopInput.required = true;
         submitBtn.textContent = 'Create owner account';
         authHeading.textContent = 'Set up your shop';
         authSub.textContent = 'Create the owner account to get started.';
@@ -187,13 +194,14 @@
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
     const name = document.getElementById('name').value.trim();
+    const shopName = shopInput.value.trim();
 
     const endpoint = needsSetup ? '/api/auth/setup' : '/api/auth/login';
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, name }),
+        body: JSON.stringify({ username, password, name, shopName }),
       });
       const data = await res.json();
       if (!res.ok) {

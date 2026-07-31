@@ -330,6 +330,11 @@ async function boot() {
     if (me.role !== 'owner') { window.location.href = '/pos.html'; return; }
 
     userNameEl.textContent = `${me.name} (${me.role})`;
+
+    fetch('/api/shop').then(r => r.json()).then(({ name }) => {
+      if (name) document.getElementById('shopTagline').textContent = name;
+    }).catch(() => {});
+
     switchTab('overview');
 
     // Real-time refresh: keep P&L and sales history current as new sales land.

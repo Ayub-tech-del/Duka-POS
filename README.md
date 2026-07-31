@@ -6,7 +6,19 @@ an M-Pesa STK Push straight to the customer's phone.
 ## Stack
 - **Backend:** Node + Express, handles Daraja OAuth + STK Push (must be server-side —
   Safaricom needs your secret key, and browsers can't call Daraja directly due to CORS).
+- **Database:** SQLite via Node's built-in `node:sqlite` (`kenya-pos.db`, created on first
+  run) — accounts, products, and sales persist across restarts. Requires **Node 22.5+**.
 - **Frontend:** plain HTML/CSS/JS, no build step, in `/public`.
+
+## Setup / signup
+The first person to visit `/login.html` sets up the shop: owner username, password, and a
+shop/business name, all in one form before the dashboard is reachable. That shop name shows
+up in the dashboard sidebar and the POS header for anyone using the till. Staff accounts are
+added later from the dashboard's Staff tab and log in with just a username/password.
+
+If you're upgrading from an older version of this app that used `data.json`, it's imported
+into SQLite automatically the first time the new server starts, then renamed to
+`data.json.migrated` so it's not reimported on the next boot.
 
 ## 1. Get Daraja credentials (free, ~5 min)
 1. Go to https://developer.safaricom.co.ke and create an account.
@@ -51,15 +63,15 @@ Visit http://localhost:3000
 ## Going live
 - Switch `MPESA_ENV=production` and use your business's live shortcode + passkey
   (you apply for these once Safaricom approves your Daraja production app)
-- Swap the in-memory `transactions` object in `server.js` for a real database
-  (Postgres/SQLite) so receipts survive a server restart
-- Swap the hardcoded `PRODUCTS` array in `public/app.js` for your real inventory,
-  ideally served from an API/database so you can edit stock without redeploying
+- If you deploy somewhere with an ephemeral/reset-on-deploy filesystem (Render, Vercel,
+  Railway without a persistent volume, etc.), attach a persistent disk for `kenya-pos.db`
+  and `public/uploads/` — otherwise both reset on every redeploy. A managed Postgres
+  instance is the other common fix; that'd mean swapping out `db.js`.
 
 ## File map
 ```
 server.js               → Express server: auth, products, sales, STK push, callback, P&L
-db.js                    → simple JSON-file data store (data.json is created on first run)
+db.js                    → SQLite data store (kenya-pos.db, created on first run)
 public/landing.html      → marketing homepage (illustrated hero, features, Google/login CTAs)
 public/login.html        → sign-in / first-run owner setup
 public/pos.html          → the till (product grid + till-roll receipt)
