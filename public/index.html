@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="icon" type="image/png" href="favicon-32.png">
+<title>Duka POS</title>
+</head>
+<body>
+<script>
+  fetch('/api/auth/me')
+    .then(r => {
+      if (!r.ok) { window.location.href = '/landing.html'; return null; }
+      return r.json();
+    })
+    .then(user => {
+      if (!user) return;
+      window.location.href = user.role === 'owner' ? '/dashboard.html' : '/pos.html';
+    })
+    .catch(() => { window.location.href = '/landing.html'; });
+</script>
+</body>
+</html>

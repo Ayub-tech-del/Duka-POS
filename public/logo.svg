@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="110" fill="#2a1b12"/>
+
+  <!-- payment ping rings, the STK push moment landing -->
+  <circle cx="380" cy="130" r="70" fill="none" stroke="#d99a2b" stroke-width="6" opacity="0.35"/>
+  <circle cx="380" cy="130" r="48" fill="none" stroke="#d99a2b" stroke-width="7" opacity="0.55"/>
+  <circle cx="380" cy="130" r="26" fill="#d99a2b"/>
+
+  <!-- slanted D mark -->
+  <g transform="rotate(-8 256 270)">
+    <path d="M 130 130 L 130 410 L 260 410 C 350 410 400 350 400 270 C 400 190 350 130 260 130 Z
+             M 205 195 L 255 195 C 305 195 335 225 335 270 C 335 315 305 345 255 345 L 205 345 Z"
+          fill="#f9f0e1" fill-rule="evenodd"/>
+  </g>
+</svg>

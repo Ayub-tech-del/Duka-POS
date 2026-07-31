@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="favicon-32.png">
+<title>Duka POS — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="transitions.css">
+</head>
+<body>
+<div id="pageCurtain"></div>
+
+<div class="dash">
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="logo.svg" alt="Duka POS logo" class="brand-mark">
+      <div>
+        <h1>Duka POS</h1>
+        <p class="tagline">Owner dashboard</p>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item active" data-tab="overview">📊 Overview</button>
+      <button class="nav-item" data-tab="sales">🧾 Sales history</button>
+      <button class="nav-item" data-tab="products">📦 Products</button>
+      <button class="nav-item" data-tab="staff">👥 Staff</button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="/pos.html" class="pos-link">→ Open POS till</a>
+      <div class="user-chip">
+        <span id="userName">…</span>
+        <button id="logoutBtn" class="logout-link">Log out</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- OVERVIEW / P&L -->
+    <section id="tab-overview" class="tab-panel active">
+      <div class="panel-header">
+        <h2>Profit &amp; Loss</h2>
+        <div class="range-picker">
+          <select id="rangeSelect">
+            <option value="today">Today</option>
+            <option value="week">Last 7 days</option>
+            <option value="month" selected>Last 30 days</option>
+            <option value="all">All time</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Revenue</div>
+          <div class="stat-value" id="statRevenue">KSh 0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Cost of goods</div>
+          <div class="stat-value" id="statCogs">KSh 0</div>
+        </div>
+        <div class="stat-card highlight">
+          <div class="stat-label">Profit</div>
+          <div class="stat-value" id="statProfit">KSh 0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Margin</div>
+          <div class="stat-value" id="statMargin">0%</div>
+        </div>
+      </div>
+
+      <div class="panel-block">
+        <h3>Top products by revenue</h3>
+        <table class="data-table" id="byProductTable">
+          <thead>
+            <tr><th>Product</th><th>Qty sold</th><th>Revenue</th><th>Cost</th><th>Profit</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SALES HISTORY -->
+    <section id="tab-sales" class="tab-panel">
+      <div class="panel-header"><h2>Sales history</h2></div>
+      <table class="data-table" id="salesTable">
+        <thead>
+          <tr><th>#</th><th>Date</th><th>Cashier</th><th>Items</th><th>Total</th><th>Phone</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section id="tab-products" class="tab-panel">
+      <div class="panel-header">
+        <h2>Products</h2>
+        <button id="addProductBtn" class="primary-btn">+ Add product</button>
+      </div>
+      <table class="data-table" id="productsTable">
+        <thead>
+          <tr><th>Product</th><th>Category</th><th>Sell price</th><th>Cost price</th><th>Margin</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- STAFF -->
+    <section id="tab-staff" class="tab-panel">
+      <div class="panel-header">
+        <h2>Staff accounts</h2>
+        <button id="addStaffBtn" class="primary-btn">+ Add staff</button>
+      </div>
+      <table class="data-table" id="staffTable">
+        <thead>
+          <tr><th>Name</th><th>Username</th><th>Role</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+  </main>
+</div>
+
+<!-- Simple modal used for add-product / add-staff forms -->
+<div id="modalOverlay" class="modal-overlay hidden">
+  <div class="modal">
+    <h3 id="modalTitle">Title</h3>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button id="modalCancel" class="ghost-btn">Cancel</button>
+      <button id="modalConfirm" class="primary-btn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="transitions.js"></script>
+<script src="dashboard.js"></script>
+<script>
+  // dashboard.js doesn't exist yet, so wire just enough here to make logout work.
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    navigateWithFade('/login.html');
+  });
+</script>
+</body>
+</html>
