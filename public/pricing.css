@@ -140,6 +140,11 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
   font-size: 13px;
   color: var(--ink-soft);
 }
+.plan-price-note {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin: 2px 0 0;
+}
 .plan-tagline {
   font-family: "Fraunces", serif;
   font-style: italic;
@@ -213,4 +218,8 @@ html, body { margin: 0; background: var(--paper); font-family: "Space Grotesk", 
 @media (max-width: 860px) {
   .pricing-grid { grid-template-columns: 1fr; }
   .pricing-hero h1 { font-size: 27px; }
+}
+
+@media (max-width: 480px) {
+  .topbar-inner { flex-wrap: wrap; row-gap: 10px; }
 }
