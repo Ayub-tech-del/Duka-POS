@@ -112,7 +112,7 @@ function publicUser(u) {
 // ---- Auth routes ----------------------------------------------------------
 
 app.post('/api/auth/setup', async (req, res) => {
-  const data = db.load();
+  const data = await db.load();
   if (data.users.length > 0) {
     return res.status(400).json({ error: 'Setup already completed. Log in instead.' });
   }
@@ -121,27 +121,27 @@ app.post('/api/auth/setup', async (req, res) => {
   if (!shopName || !shopName.trim()) return res.status(400).json({ error: 'shop name required' });
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const owner = { id: 1, username, passwordHash, role: 'owner', name: name || username, email: email || null };
+  const owner = { username, passwordHash, role: 'owner', name: name || username, email: email || null };
   data.users.push(owner);
   data.shop = { name: shopName.trim() };
-  db.save(data);
+  await db.save(data);
   req.session.user = publicUser(owner);
   res.json(publicUser(owner));
 });
 
-app.get('/api/auth/needs-setup', (req, res) => {
-  const data = db.load();
+app.get('/api/auth/needs-setup', async (req, res) => {
+  const data = await db.load();
   res.json({ needsSetup: data.users.length === 0 });
 });
 
-app.get('/api/shop', requireAuth, (req, res) => {
-  const data = db.load();
+app.get('/api/shop', requireAuth, async (req, res) => {
+  const data = await db.load();
   res.json({ name: data.shop?.name || null });
 });
 
 app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
-  const data = db.load();
+  const data = await db.load();
   const user = data.users.find(u => u.username.toLowerCase() === (username || '').toLowerCase());
   if (!user) return res.status(401).json({ error: 'Invalid username or password' });
   if (!user.passwordHash) return res.status(401).json({ error: 'This account signs in with Google only.' });
@@ -202,23 +202,22 @@ app.get('/api/auth/google/callback', async (req, res) => {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
 
-    const data = db.load();
+    const data = await db.load();
     let user = data.users.find(u => u.googleId === profile.sub);
     if (!user) user = data.users.find(u => u.email && u.email.toLowerCase() === profile.email.toLowerCase());
 
     if (!user) {
       if (data.users.length === 0) {
         // First account ever created — make them the owner
-        const newId = 1;
-        user = { id: newId, username: profile.email, googleId: profile.sub, email: profile.email, role: 'owner', name: profile.name || profile.email };
+        user = { username: profile.email, googleId: profile.sub, email: profile.email, role: 'owner', name: profile.name || profile.email };
         data.users.push(user);
-        db.save(data);
+        await db.save(data);
       } else {
         return res.redirect('/login.html?google=notfound');
       }
     } else if (!user.googleId) {
       user.googleId = profile.sub;
-      db.save(data);
+      await db.save(data);
     }
 
     req.session.user = publicUser(user);
@@ -236,39 +235,38 @@ app.post('/api/staff', requireOwner, async (req, res) => {
   const { username, password, name, email } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'username and password required' });
 
-  const data = db.load();
+  const data = await db.load();
   if (data.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
     return res.status(400).json({ error: 'That username is already taken' });
   }
   const passwordHash = await bcrypt.hash(password, 10);
-  const newId = Math.max(...data.users.map(u => u.id), 0) + 1;
-  const staff = { id: newId, username, passwordHash, role: 'staff', name: name || username, email: email || null };
+  const staff = { username, passwordHash, role: 'staff', name: name || username, email: email || null };
   data.users.push(staff);
-  db.save(data);
+  await db.save(data);
   res.json(publicUser(staff));
 });
 
-app.get('/api/staff', requireOwner, (req, res) => {
-  const data = db.load();
+app.get('/api/staff', requireOwner, async (req, res) => {
+  const data = await db.load();
   res.json(data.users.map(publicUser));
 });
 
-app.delete('/api/staff/:id', requireOwner, (req, res) => {
-  const data = db.load();
+app.delete('/api/staff/:id', requireOwner, async (req, res) => {
+  const data = await db.load();
   const id = Number(req.params.id);
   const target = data.users.find(u => u.id === id);
   if (target && target.role === 'owner') {
     return res.status(400).json({ error: "Can't remove the owner account" });
   }
   data.users = data.users.filter(u => u.id !== id);
-  db.save(data);
+  await db.save(data);
   res.json({ ok: true });
 });
 
 // ---- Product routes ---------------------------------------------------
 
-app.get('/api/products', requireAuth, (req, res) => {
-  const data = db.load();
+app.get('/api/products', requireAuth, async (req, res) => {
+  const data = await db.load();
   res.json(data.products);
 });
 
@@ -279,8 +277,8 @@ function handleUpload(req, res, next) {
   });
 }
 
-app.put('/api/products/:id', requireOwner, handleUpload, (req, res) => {
-  const data = db.load();
+app.put('/api/products/:id', requireOwner, handleUpload, async (req, res) => {
+  const data = await db.load();
   const id = Number(req.params.id);
   const product = data.products.find(p => p.id === id);
   if (!product) return res.status(404).json({ error: 'Product not found' });
@@ -300,28 +298,28 @@ app.put('/api/products/:id', requireOwner, handleUpload, (req, res) => {
     delete product.image;
   }
 
-  db.save(data);
+  await db.save(data);
   res.json(product);
 });
 
-app.post('/api/products', requireOwner, handleUpload, (req, res) => {
-  const data = db.load();
+app.post('/api/products', requireOwner, handleUpload, async (req, res) => {
+  const data = await db.load();
   const { name, price, cost = 0, emoji = '📦', cat = 'General' } = req.body;
   if (!name || price === undefined) return res.status(400).json({ error: 'name and price required' });
 
-  const product = { id: data.nextProductId++, name, price: Number(price), cost: Number(cost), emoji, cat };
+  const product = { name, price: Number(price), cost: Number(cost), emoji, cat };
   if (req.file) product.image = `/uploads/${req.file.filename}`;
   data.products.push(product);
-  db.save(data);
+  await db.save(data);
   res.json(product);
 });
 
-app.delete('/api/products/:id', requireOwner, (req, res) => {
-  const data = db.load();
+app.delete('/api/products/:id', requireOwner, async (req, res) => {
+  const data = await db.load();
   const product = data.products.find(p => p.id === Number(req.params.id));
   if (product) deleteUpload(product.image);
   data.products = data.products.filter(p => p.id !== Number(req.params.id));
-  db.save(data);
+  await db.save(data);
   res.json({ ok: true });
 });
 
@@ -340,7 +338,7 @@ app.post('/api/stkpush', requireAuth, async (req, res) => {
       });
     }
 
-    const data = db.load();
+    const data = await db.load();
     const items = cart.map(({ productId, qty }) => {
       const p = data.products.find(p => p.id === Number(productId));
       return p ? { productId: p.id, name: p.name, qty, price: p.price, cost: p.cost || 0 } : null;
@@ -393,7 +391,7 @@ app.post('/api/stkpush', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/api/mpesa/callback', (req, res) => {
+app.post('/api/mpesa/callback', async (req, res) => {
   const body = req.body?.Body?.stkCallback;
   if (body) {
     const { CheckoutRequestID, ResultCode, ResultDesc } = body;
@@ -404,9 +402,8 @@ app.post('/api/mpesa/callback', (req, res) => {
       pending.resultDesc = ResultDesc;
 
       if (ResultCode === 0) {
-        const data = db.load();
+        const data = await db.load();
         const sale = {
-          id: data.nextSaleId++,
           userId: pending.userId,
           username: pending.username,
           items: pending.items,
@@ -416,7 +413,7 @@ app.post('/api/mpesa/callback', (req, res) => {
           createdAt: new Date().toISOString(),
         };
         data.sales.push(sale);
-        db.save(data);
+        await db.save(data);
       }
     }
     console.log('M-Pesa callback:', CheckoutRequestID, ResultDesc);
@@ -430,15 +427,15 @@ app.get('/api/status/:checkoutRequestId', requireAuth, (req, res) => {
   res.json(tx);
 });
 
-app.get('/api/sales', requireAuth, (req, res) => {
-  const data = db.load();
+app.get('/api/sales', requireAuth, async (req, res) => {
+  const data = await db.load();
   const isOwner = req.session.user.role === 'owner';
   const sales = isOwner ? data.sales : data.sales.filter(s => s.userId === req.session.user.id);
   res.json(sales.slice().reverse());
 });
 
-app.get('/api/reports/pl', requireOwner, (req, res) => {
-  const data = db.load();
+app.get('/api/reports/pl', requireOwner, async (req, res) => {
+  const data = await db.load();
   const { from, to } = req.query;
 
   const fromDate = from ? new Date(from) : new Date(0);
@@ -480,4 +477,11 @@ app.get('/api/reports/pl', requireOwner, (req, res) => {
   });
 });
 
-app.listen(PORT, () => console.log(`Duka POS running on http://localhost:${PORT}`));
+db.init()
+  .then(() => {
+    app.listen(PORT, () => console.log(`Duka POS running on http://localhost:${PORT}`));
+  })
+  .catch((err) => {
+    console.error('Failed to initialize the database:', err.message);
+    process.exit(1);
+  });
