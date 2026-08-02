@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="favicon-32.png">
+<title>Duka POS — Pricing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pricing.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <img src="logo.svg" alt="Duka POS logo" class="brand-mark">
+      <span class="brand-name">Duka POS</span>
+    </div>
+    <div class="topbar-actions">
+      <a href="/dashboard.html" class="btn-ghost">← Back to dashboard</a>
+    </div>
+  </div>
+</header>
+
+<section class="pricing-hero">
+  <p class="eyebrow">Plans</p>
+  <h1>Grow into it as your duka grows.</h1>
+  <p class="pricing-sub">Start free with a single till. Upgrade when you add staff, more shops, or need deeper reporting.</p>
+</section>
+
+<section class="pricing-grid">
+
+  <article class="pricing-card">
+    <div class="plan-head">
+      <h2 class="plan-name">Free</h2>
+      <p class="plan-price">KSh —<span>/month</span></p>
+      <p class="plan-tagline">One shop, running today.</p>
+    </div>
+    <ul class="plan-features">
+      <li>1 shop, 1 user</li>
+      <li>Unlimited sales</li>
+      <li>Sales history</li>
+      <li>Basic P&amp;L (today / this week)</li>
+    </ul>
+    <button class="ghost-btn plan-cta" data-plan="free">Current plan</button>
+  </article>
+
+  <article class="pricing-card featured">
+    <div class="featured-badge">Recommended</div>
+    <div class="plan-head">
+      <h2 class="plan-name">Pro</h2>
+      <p class="plan-price">KSh —<span>/month</span></p>
+      <p class="plan-tagline">For a shop with a team.</p>
+    </div>
+    <ul class="plan-features">
+      <li>Everything in Free</li>
+      <li>Staff accounts</li>
+      <li>Full date-range P&amp;L</li>
+      <li>Stock tracking with low-stock alerts</li>
+      <li>Spreadsheet export (Excel/CSV)</li>
+      <li>Charts and sales trends</li>
+    </ul>
+    <button class="primary-btn plan-cta" data-plan="pro">Upgrade to Pro</button>
+  </article>
+
+  <article class="pricing-card">
+    <div class="plan-head">
+      <h2 class="plan-name">Max</h2>
+      <p class="plan-price">KSh —<span>/month</span></p>
+      <p class="plan-tagline">For more than one shop.</p>
+    </div>
+    <ul class="plan-features">
+      <li>Everything in Pro</li>
+      <li>Multiple shops with combined reporting</li>
+      <li>Per-shop comparison</li>
+      <li>Daily SMS summary to owner</li>
+    </ul>
+    <button class="ghost-btn plan-cta" data-plan="max">Upgrade to Max</button>
+  </article>
+
+</section>
+
+<footer class="footer">
+  <p>Duka POS · Leo ni leo</p>
+</footer>
+
+<script>
+  document.querySelectorAll('.plan-cta').forEach(btn => {
+    btn.addEventListener('click', () => {
+      console.log('Selected plan:', btn.dataset.plan);
+    });
+  });
+</script>
+</body>
+</html>

@@ -106,7 +106,7 @@ function requireOwner(req, res, next) {
 }
 
 function publicUser(u) {
-  return { id: u.id, username: u.username, name: u.name, role: u.role };
+  return { id: u.id, username: u.username, name: u.name, role: u.role, plan: u.plan || 'free' };
 }
 
 // ---- Auth routes ----------------------------------------------------------

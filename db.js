@@ -17,7 +17,8 @@ sqlite.exec(`
     googleId TEXT,
     email TEXT,
     role TEXT NOT NULL,
-    name TEXT
+    name TEXT,
+    plan TEXT NOT NULL DEFAULT 'free'
   );
   CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY,
@@ -44,6 +45,12 @@ sqlite.exec(`
   );
 `);
 
+// Migration: older DB files predate the `plan` column.
+const userColumns = sqlite.prepare('PRAGMA table_info(users)').all().map(c => c.name);
+if (!userColumns.includes('plan')) {
+  sqlite.exec("ALTER TABLE users ADD COLUMN plan TEXT NOT NULL DEFAULT 'free'");
+}
+
 const DEFAULT_PRODUCTS = [
   { id: 1, name: 'Unga 2kg', price: 220, cost: 180, emoji: '🌾', cat: 'Groceries' },
   { id: 2, name: 'Sukuma Wiki', price: 20, cost: 10, emoji: '🥬', cat: 'Groceries' },
@@ -64,7 +71,7 @@ const DEFAULT_PRODUCTS = [
 ];
 
 function rowToUser(r) {
-  return { id: r.id, username: r.username, passwordHash: r.passwordHash, googleId: r.googleId, email: r.email, role: r.role, name: r.name };
+  return { id: r.id, username: r.username, passwordHash: r.passwordHash, googleId: r.googleId, email: r.email, role: r.role, name: r.name, plan: r.plan };
 }
 function rowToProduct(r) {
   return { id: r.id, name: r.name, price: r.price, cost: r.cost, emoji: r.emoji, cat: r.cat, image: r.image ?? undefined };
@@ -124,9 +131,9 @@ function save(data) {
   sqlite.exec('BEGIN');
   try {
     sqlite.exec('DELETE FROM users');
-    const insUser = sqlite.prepare('INSERT INTO users (id, username, passwordHash, googleId, email, role, name) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    const insUser = sqlite.prepare('INSERT INTO users (id, username, passwordHash, googleId, email, role, name, plan) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
     for (const u of data.users || []) {
-      insUser.run(u.id, u.username, u.passwordHash ?? null, u.googleId ?? null, u.email ?? null, u.role, u.name ?? null);
+      insUser.run(u.id, u.username, u.passwordHash ?? null, u.googleId ?? null, u.email ?? null, u.role, u.name ?? null, u.plan ?? 'free');
     }
 
     sqlite.exec('DELETE FROM products');
